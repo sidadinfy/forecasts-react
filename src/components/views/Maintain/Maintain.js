@@ -5,6 +5,13 @@ import { Column } from "primereact/column";
 import { linkNameMaintain } from "../../../routes";
 import { InputText } from "primereact/inputtext";
 import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
+const citySelectItems = [
+  { label: "New York", value: "NY" },
+  { label: "Rome", value: "RM" },
+  { label: "London", value: "LDN" },
+  { label: "Istanbul", value: "IST" },
+  { label: "Paris", value: "PRS" },
+];
 class Maintain extends React.Component {
   constructor(props) {
     super(props);
@@ -174,6 +181,7 @@ class Maintain extends React.Component {
             <div>Product Category</div>
             <div className="">
               <SimpleDropdown
+                options={citySelectItems}
                 value={this.state.value}
                 handleChange={(val) => {
                   this.setState({ value: val });
