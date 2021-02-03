@@ -4,17 +4,10 @@ import routes from "../routes";
 import AuthValidator from "../components/AuthValidator/AuthValidator";
 import Header from "./Header";
 class DefaultLayout extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      openNav: false,
-    };
-  }
-
   render() {
     return (
       <div>
-        <Header />
+        <Header location={this.props.location} />
         <main>
           <React.Suspense fallback={<div>Loading...</div>}>
             <Switch>
