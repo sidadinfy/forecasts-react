@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { linkNameMaintain } from "../../../routes";
+import { InputText } from "primereact/inputtext";
 class Maintain extends React.Component {
   constructor(props) {
     super(props);
@@ -133,19 +134,73 @@ class Maintain extends React.Component {
   }
   render() {
     return (
-      <div className="bg-gray-300">
+      <>
         <Helmet>
           <meta charSet="utf-8" />
           <title>{linkNameMaintain}</title>
         </Helmet>
-        <div>Maintain Forecast</div>
+        <div className="mx-auto max-w-2xl">
+          <div className="text-3xl font-bold text-center">
+            Maintain Forecast
+          </div>
+          <div className="grid grid-cols-3 col-gap-0">
+            <div>Forecast Period</div>
+            <div className="flex items-center">
+              <div className="pr-4">From</div>
+              <div className="w-10/12">
+                <InputText
+                  id="firstname5"
+                  type="text"
+                  placeholder="Firstname"
+                  className="h-8"
+                  style={{ width: "90.333333%" }}
+                />
+              </div>
+            </div>
+            <div className="flex items-center">
+              <div className="pr-4">To</div>
+              <div className="w-10/12">
+                <InputText
+                  id="firstname5"
+                  type="text"
+                  placeholder="Firstname"
+                  className="h-8"
+                  style={{ width: "86.333333%" }}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 mt-2 col-gap-0">
+            <div>Product Category</div>
+            <div className="w-11/12">
+              <InputText
+                id="firstname5"
+                type="text"
+                placeholder="Firstname"
+                className="h-8"
+              />
+            </div>
+            <div className="flex items-center">
+              <div className="pr-4">SKU</div>
+              <div className="w-10/12">
+                <InputText
+                  id="firstname5"
+                  type="text"
+                  placeholder="Firstname"
+                  className="h-8 w-10/12 "
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         <DataTable value={this.state.products}>
           <Column field="code" header="Code"></Column>
           <Column field="name" header="Name"></Column>
           <Column field="category" header="Category"></Column>
           <Column field="quantity" header="Quantity"></Column>
         </DataTable>
-      </div>
+      </>
     );
   }
 }
