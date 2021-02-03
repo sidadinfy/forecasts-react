@@ -4,10 +4,12 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { linkNameMaintain } from "../../../routes";
 import { InputText } from "primereact/inputtext";
+import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
 class Maintain extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      value: "",
       products: [
         {
           id: "1000",
@@ -143,7 +145,7 @@ class Maintain extends React.Component {
           <div className="text-3xl font-bold text-center">
             Maintain Forecast
           </div>
-          <div className="grid grid-cols-3 col-gap-0">
+          <div className="grid grid-cols-3 col-gap-0 mt-3">
             <div>Forecast Period</div>
             <div className="flex items-center">
               <div className="pr-4">From</div>
@@ -152,7 +154,6 @@ class Maintain extends React.Component {
                   id="firstname5"
                   type="text"
                   placeholder="Firstname"
-                  className="h-8"
                   style={{ width: "90.333333%" }}
                 />
               </div>
@@ -164,30 +165,31 @@ class Maintain extends React.Component {
                   id="firstname5"
                   type="text"
                   placeholder="Firstname"
-                  className="h-8"
                   style={{ width: "86.333333%" }}
                 />
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-3 mt-2 col-gap-0">
+          <div className="grid grid-cols-3 mt-2 col-gap-0 mb-6">
             <div>Product Category</div>
-            <div className="w-11/12">
-              <InputText
-                id="firstname5"
-                type="text"
-                placeholder="Firstname"
-                className="h-8"
+            <div className="">
+              <SimpleDropdown
+                value={this.state.value}
+                handleChange={(val) => {
+                  this.setState({ value: val });
+                }}
+                className="w-11/12"
               />
             </div>
             <div className="flex items-center">
               <div className="pr-4">SKU</div>
               <div className="w-10/12">
                 <InputText
-                  id="firstname5"
+                  disabled
+                  id="sku"
                   type="text"
-                  placeholder="Firstname"
-                  className="h-8 w-10/12 "
+                  placeholder="SKU"
+                  className="w-10/12 "
                 />
               </div>
             </div>
