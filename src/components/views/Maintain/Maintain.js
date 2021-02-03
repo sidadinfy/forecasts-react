@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { linkNameMaintain } from "../../../routes";
+import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
 const citySelectItems = [
@@ -15,132 +16,116 @@ const citySelectItems = [
 class Maintain extends React.Component {
   constructor(props) {
     super(props);
+    this.df = React.createRef();
     this.state = {
       value: "",
       products: [
         {
-          id: "1000",
-          code: "f230fh0g3",
-          name: "Bamboo Watch",
-          description: "Product Description",
-          image: "bamboo-watch.jpg",
-          price: 65,
-          category: "Accessories",
-          quantity: 24,
-          inventoryStatus: "INSTOCK",
-          rating: 5,
+          id: "70a34114-1c75-4592-9866-26fb94b5a402",
+          product_category: "Dental",
+          sku_code: "ABC123",
+          uom: "Case",
+          period: "23-Apr-2020",
+          stats_forecast: 27,
         },
         {
-          id: "1001",
-          code: "nvklal433",
-          name: "Black Watch",
-          description: "Product Description",
-          image: "black-watch.jpg",
-          price: 72,
-          category: "Accessories",
-          quantity: 61,
-          inventoryStatus: "INSTOCK",
-          rating: 4,
+          id: "b4fa6945-15b8-4ded-8ffb-82c9015f5460",
+          product_category: "Detergents",
+          sku_code: "Tide",
+          uom: "Case",
+          period: "12-Nov-2020",
+          stats_forecast: 93,
         },
         {
-          id: "1002",
-          code: "zz21cz3c1",
-          name: "Blue Band",
-          description: "Product Description",
-          image: "blue-band.jpg",
-          price: 79,
-          category: "Fitness",
-          quantity: 2,
-          inventoryStatus: "LOWSTOCK",
-          rating: 3,
+          id: "4513cec3-bc5f-4ce3-aee5-7acec96d5e65",
+          product_category: "Dental",
+          sku_code: "ABC123",
+          uom: "Case",
+          period: "05-Jul-2020",
+          stats_forecast: 59,
         },
         {
-          id: "1003",
-          code: "244wgerg2",
-          name: "Blue T-Shirt",
-          description: "Product Description",
-          image: "blue-t-shirt.jpg",
-          price: 29,
-          category: "Clothing",
-          quantity: 25,
-          inventoryStatus: "INSTOCK",
-          rating: 5,
+          id: "243832d7-7a0e-4531-995c-9a2998dcec2a",
+          product_category: "Detergents",
+          sku_code: "Tide",
+          uom: "Case",
+          period: "21-Mar-2020",
+          stats_forecast: 39,
         },
         {
-          id: "1004",
-          code: "h456wer53",
-          name: "Bracelet",
-          description: "Product Description",
-          image: "bracelet.jpg",
-          price: 15,
-          category: "Accessories",
-          quantity: 73,
-          inventoryStatus: "INSTOCK",
-          rating: 4,
+          id: "ccfc31a1-d6b2-4b0b-8fa2-92d7b25456b0",
+          product_category: "Dental",
+          sku_code: "ABC123",
+          uom: "Case",
+          period: "03-Sep-2020",
+          stats_forecast: 20,
         },
         {
-          id: "1005",
-          code: "av2231fwg",
-          name: "Brown Purse",
-          description: "Product Description",
-          image: "brown-purse.jpg",
-          price: 120,
-          category: "Accessories",
-          quantity: 0,
-          inventoryStatus: "OUTOFSTOCK",
-          rating: 4,
+          id: "7b59a582-31cf-4b87-8b58-fb006087b17c",
+          product_category: "Detergents",
+          sku_code: "Tide",
+          uom: "Case",
+          period: "24-May-2020",
+          stats_forecast: 29,
         },
         {
-          id: "1006",
-          code: "bib36pfvm",
-          name: "Chakra Bracelet",
-          description: "Product Description",
-          image: "chakra-bracelet.jpg",
-          price: 32,
-          category: "Accessories",
-          quantity: 5,
-          inventoryStatus: "LOWSTOCK",
-          rating: 3,
+          id: "4b648056-cd3a-474f-b28c-455610238ea7",
+          product_category: "Dental",
+          sku_code: "ABC123",
+          uom: "Case",
+          period: "08-Mar-2020",
+          stats_forecast: 70,
         },
         {
-          id: "1007",
-          code: "mbvjkgip5",
-          name: "Galaxy Earrings",
-          description: "Product Description",
-          image: "galaxy-earrings.jpg",
-          price: 34,
-          category: "Accessories",
-          quantity: 23,
-          inventoryStatus: "INSTOCK",
-          rating: 5,
+          id: "d757a278-0ecd-4c9b-901f-d6e4c716ee32",
+          product_category: "Detergents",
+          sku_code: "Tide",
+          uom: "Case",
+          period: "22-Jun-2020",
+          stats_forecast: 53,
         },
         {
-          id: "1008",
-          code: "vbb124btr",
-          name: "Game Controller",
-          description: "Product Description",
-          image: "game-controller.jpg",
-          price: 99,
-          category: "Electronics",
-          quantity: 2,
-          inventoryStatus: "LOWSTOCK",
-          rating: 4,
+          id: "03f5ad06-fa90-41d9-b5e4-c615d4dd1c92",
+          product_category: "Dental",
+          sku_code: "ABC123",
+          uom: "Case",
+          period: "11-Oct-2020",
+          stats_forecast: 28,
         },
         {
-          id: "1009",
-          code: "cm230f032",
-          name: "Gaming Set",
-          description: "Product Description",
-          image: "gaming-set.jpg",
-          price: 299,
-          category: "Electronics",
-          quantity: 63,
-          inventoryStatus: "INSTOCK",
-          rating: 3,
+          id: "3f4c09fc-a381-4a78-b489-f0ec78c8b6bb",
+          product_category: "Detergents",
+          sku_code: "Tide",
+          uom: "Case",
+          period: "15-Jan-2021",
+          stats_forecast: 98,
         },
       ],
     };
   }
+
+  renderRecBody = (rowdata) => {
+    return (
+      <div>
+        <InputText
+          id={rowdata.id}
+          type="text"
+          placeholder="Recommended Forecast"
+          onChange={(e) => {
+            let products = this.state.products;
+            if (products.length > 0) {
+              let currentProd = products.filter(
+                (item) => item.id === rowdata.id
+              );
+              currentProd[0].rec_forecast = e.target.value;
+
+              this.setState({ products });
+            }
+          }}
+        />
+      </div>
+    );
+  };
   render() {
     return (
       <>
@@ -158,7 +143,7 @@ class Maintain extends React.Component {
               <div className="pr-4">From</div>
               <div className="w-10/12">
                 <InputText
-                  id="firstname5"
+                  id="firstname52"
                   type="text"
                   placeholder="Firstname"
                   style={{ width: "90.333333%" }}
@@ -203,13 +188,58 @@ class Maintain extends React.Component {
             </div>
           </div>
         </div>
-
-        <DataTable value={this.state.products}>
-          <Column field="code" header="Code"></Column>
-          <Column field="name" header="Name"></Column>
-          <Column field="category" header="Category"></Column>
-          <Column field="quantity" header="Quantity"></Column>
-        </DataTable>
+        <div className="max-w-5xl mx-auto my-5">
+          <DataTable
+            ref={this.df}
+            value={this.state.products}
+            className="p-datatable-striped w-full"
+          >
+            <Column
+              headerStyle={{ textAlign: "center", width: "180px" }}
+              bodyStyle={{ textAlign: "center", width: "180px" }}
+              field="product_category"
+              header="Product Category"
+            ></Column>
+            <Column
+              headerStyle={{ textAlign: "center", width: "110px" }}
+              bodyStyle={{ textAlign: "center", width: "110px" }}
+              field="sku_code"
+              header="SKU Code"
+            ></Column>
+            <Column
+              headerStyle={{ textAlign: "center", width: "120px" }}
+              bodyStyle={{ textAlign: "center", width: "120px" }}
+              field="uom"
+              header="UOM"
+            ></Column>
+            <Column
+              headerStyle={{ textAlign: "center", width: "180px" }}
+              bodyStyle={{ textAlign: "center", width: "180px" }}
+              field="period"
+              header="Period"
+            ></Column>
+            <Column
+              headerStyle={{ textAlign: "center" }}
+              bodyStyle={{ textAlign: "center" }}
+              field="stats_forecast"
+              header="Statistical Forecast"
+            ></Column>
+            <Column
+              headerStyle={{ textAlign: "center" }}
+              bodyStyle={{ textAlign: "center" }}
+              field="rec_forecast"
+              header="Recommended Forecast"
+              body={(rowdata) => this.renderRecBody(rowdata)}
+            ></Column>
+          </DataTable>
+          <Button
+            label="Export"
+            className="p-button-success"
+            onClick={() => {
+              this.df.current.exportCSV();
+            }}
+          />
+        </div>
       </>
     );
   }
