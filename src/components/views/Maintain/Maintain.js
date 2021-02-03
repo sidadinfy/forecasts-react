@@ -133,7 +133,7 @@ class Maintain extends React.Component {
   }
   render() {
     return (
-      <div className="App">
+      <div className="bg-gray-300">
         <Helmet>
           <meta charSet="utf-8" />
           <title>{linkNameMaintain}</title>

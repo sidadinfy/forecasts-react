@@ -4,8 +4,8 @@ import "primereact/resources/themes/mdc-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
-import "./index.css";
-import "./App.css";
+import "./assets/main.css";
+import "./assets/custom.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 

@@ -1,11 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import {
-  linkMaintain,
-  linkMasterSKU,
-  linkNameMaintain,
-  linkNameMasterSKU,
-} from "./routes";
+import { linkNameMasterSKU } from "./routes";
 const DefaultLayout = React.lazy(() => import("./containers/DefaultLayout"));
 const Page404 = React.lazy(() => import("./components/views/Page404/Page404"));
 class App extends React.Component {
