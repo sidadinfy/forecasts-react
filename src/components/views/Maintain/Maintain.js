@@ -7,11 +7,13 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
 import StaticDataService from "../../../services/DataService";
+import { Toast } from "primereact/toast";
 import Datepicker from "../../Datepicker/Datepicker";
 class Maintain extends React.Component {
   constructor(props) {
     super(props);
     this.df = React.createRef();
+    this.toastRef = React.createRef();
     this.state = {
       selectedCategory: "",
       sku: "",
@@ -118,6 +120,46 @@ class Maintain extends React.Component {
     });
   };
 
+  saveData = () => {
+    this.toastRef.current.show({
+      severity: "success",
+      summary: "Success Message",
+      detail: "Data Saved",
+    });
+  };
+
+  renderFooter() {
+    return (
+      <div className="flex justify-between mt-2">
+        <div>
+          <Button
+            label="Export"
+            className="p-button-info"
+            onClick={() => {
+              this.df.current.exportCSV();
+            }}
+          />
+        </div>
+        <div className="flex items-center">
+          <div className="mr-2">
+            <Button
+              label="Import"
+              className="p-button-warning"
+              onClick={this.saveData}
+            />
+          </div>
+          <div>
+            <Button
+              label="Save"
+              className="p-button-success"
+              onClick={this.saveData}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     let { filter } = this.state;
     return (
@@ -126,6 +168,7 @@ class Maintain extends React.Component {
           <meta charSet="utf-8" />
           <title>{linkNameMaintain}</title>
         </Helmet>
+        <Toast ref={this.toastRef} />
         <div className="mx-auto max-w-2xl">
           <div className="text-3xl font-bold text-center">
             Maintain Forecast
@@ -229,6 +272,7 @@ class Maintain extends React.Component {
             value={this.state.products}
             className="p-datatable-striped datatable-responsive-demo w-full"
             scrollable={true}
+            footer={this.renderFooter()}
           >
             <Column
               headerStyle={{ textAlign: "center", width: "180px" }}
@@ -268,13 +312,6 @@ class Maintain extends React.Component {
               body={(rowdata) => this.renderRecBody(rowdata)}
             ></Column>
           </DataTable>
-          <Button
-            label="Export"
-            className="p-button-success"
-            onClick={() => {
-              this.df.current.exportCSV();
-            }}
-          />
         </div>
       </>
     );
