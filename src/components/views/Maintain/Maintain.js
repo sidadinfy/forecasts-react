@@ -36,6 +36,7 @@ class Maintain extends React.Component {
   componentDidMount() {
     this.getAllProducts();
     this.getAllProductCategories();
+    this.getAllSKUCodes();
   }
 
   getAllProductCategories = () => {
@@ -60,6 +61,14 @@ class Maintain extends React.Component {
       .catch((err) => {
         console.log(err.message);
       });
+  };
+
+  getAllSKUCodes = () => {
+    StaticDataService.getAllSKUCodes().then((res) => {
+      if (res) {
+        this.setState({ skuCodes: res.data, originalSKUCodes: res.data });
+      }
+    });
   };
 
   renderRecBody = (rowdata) => {
