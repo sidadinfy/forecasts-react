@@ -3,148 +3,250 @@ import { Helmet } from "react-helmet";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { linkNameMasterSKU } from "../../../routes";
+import { Button } from "primereact/button";
+import Datepicker from "../../Datepicker/Datepicker";
+import StaticDataService from "../../../services/DataService";
+
+import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
+import { InputText } from "primereact/inputtext";
+
 class MasterSKU extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      products: [
-        {
-          id: "1000",
-          code: "f230fh0g3",
-          name: "Bamboo Watch",
-          description: "Product Description",
-          image: "bamboo-watch.jpg",
-          price: 65,
-          category: "Accessories",
-          quantity: 24,
-          inventoryStatus: "INSTOCK",
-          rating: 5,
-        },
-        {
-          id: "1001",
-          code: "nvklal433",
-          name: "Black Watch",
-          description: "Product Description",
-          image: "black-watch.jpg",
-          price: 72,
-          category: "Accessories",
-          quantity: 61,
-          inventoryStatus: "INSTOCK",
-          rating: 4,
-        },
-        {
-          id: "1002",
-          code: "zz21cz3c1",
-          name: "Blue Band",
-          description: "Product Description",
-          image: "blue-band.jpg",
-          price: 79,
-          category: "Fitness",
-          quantity: 2,
-          inventoryStatus: "LOWSTOCK",
-          rating: 3,
-        },
-        {
-          id: "1003",
-          code: "244wgerg2",
-          name: "Blue T-Shirt",
-          description: "Product Description",
-          image: "blue-t-shirt.jpg",
-          price: 29,
-          category: "Clothing",
-          quantity: 25,
-          inventoryStatus: "INSTOCK",
-          rating: 5,
-        },
-        {
-          id: "1004",
-          code: "h456wer53",
-          name: "Bracelet",
-          description: "Product Description",
-          image: "bracelet.jpg",
-          price: 15,
-          category: "Accessories",
-          quantity: 73,
-          inventoryStatus: "INSTOCK",
-          rating: 4,
-        },
-        {
-          id: "1005",
-          code: "av2231fwg",
-          name: "Brown Purse",
-          description: "Product Description",
-          image: "brown-purse.jpg",
-          price: 120,
-          category: "Accessories",
-          quantity: 0,
-          inventoryStatus: "OUTOFSTOCK",
-          rating: 4,
-        },
-        {
-          id: "1006",
-          code: "bib36pfvm",
-          name: "Chakra Bracelet",
-          description: "Product Description",
-          image: "chakra-bracelet.jpg",
-          price: 32,
-          category: "Accessories",
-          quantity: 5,
-          inventoryStatus: "LOWSTOCK",
-          rating: 3,
-        },
-        {
-          id: "1007",
-          code: "mbvjkgip5",
-          name: "Galaxy Earrings",
-          description: "Product Description",
-          image: "galaxy-earrings.jpg",
-          price: 34,
-          category: "Accessories",
-          quantity: 23,
-          inventoryStatus: "INSTOCK",
-          rating: 5,
-        },
-        {
-          id: "1008",
-          code: "vbb124btr",
-          name: "Game Controller",
-          description: "Product Description",
-          image: "game-controller.jpg",
-          price: 99,
-          category: "Electronics",
-          quantity: 2,
-          inventoryStatus: "LOWSTOCK",
-          rating: 4,
-        },
-        {
-          id: "1009",
-          code: "cm230f032",
-          name: "Gaming Set",
-          description: "Product Description",
-          image: "gaming-set.jpg",
-          price: 299,
-          category: "Electronics",
-          quantity: 63,
-          inventoryStatus: "INSTOCK",
-          rating: 3,
-        },
-      ],
+      filter: {},
+      data: [],
     };
   }
+
+  componentDidMount() {
+    this.getMasterSKUData();
+  }
+
+  getMasterSKUData = () => {
+    StaticDataService.getAllMasterSKUData().then((res) => {
+      if (res) {
+        this.setState({ data: res.data });
+      }
+    });
+  };
+
   render() {
+    let { filter } = this.state;
     return (
       <div className="App">
         <Helmet>
           <meta charSet="utf-8" />
           <title>{linkNameMasterSKU}</title>
         </Helmet>
-        <div>Master SKU</div>
-        <DataTable value={this.state.products}>
-          <Column field="code" header="Code"></Column>
-          <Column field="name" header="Name"></Column>
-          <Column field="category" header="Category"></Column>
-          <Column field="quantity" header="Quantity"></Column>
-        </DataTable>
+        <div className="mx-auto max-w-2xl">
+          <div className="text-3xl font-bold text-center">View SKU Master</div>
+          <div className="flex items-center w-full mt-6">
+            <div className="grid grid-cols-3 col-gap-0">
+              <div className="flex items-center">Product Category</div>
+              <div className="">
+                <SimpleDropdown
+                  options={this.state.categoryList}
+                  value={this.state.selectedCategory}
+                  handleChange={(val) => {
+                    this.setState({ selectedCategory: val }, () => {
+                      this.getSKUBasedOnCategory(val);
+                    });
+                  }}
+                  className="w-11/12"
+                />
+              </div>
+              <div className="flex items-center">
+                <div className="pr-4">SKU</div>
+                <div className="w-10/12">
+                  <InputText
+                    disabled
+                    id="sku"
+                    type="text"
+                    value={this.state.sku}
+                    placeholder="SKU"
+                    className="w-10/12 "
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <div>
+                <Button
+                  icon="pi pi-search"
+                  className="p-button-raised p-button-rounded"
+                  tooltip="Search"
+                  tooltipOptions={{ position: "top" }}
+                  onClick={this.handleSearch}
+                />
+              </div>
+              <div className="ml-2">
+                <Button
+                  icon="pi pi-times"
+                  disabled={
+                    this.state.filter &&
+                    !this.state.filter.fromDateValue &&
+                    !this.state.filter.toDateValue
+                      ? true
+                      : false
+                  }
+                  className="p-button-rounded p-button-danger p-button-raised p-button-outlined"
+                  onClick={this.handleReset}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="my-5 datatable-responsive-demo">
+          <DataTable
+            ref={this.df}
+            value={this.state.data}
+            className="p-datatable-striped datatable-responsive-demo w-full"
+            scrollable={true}
+          >
+            <Column
+              field="category"
+              header="Product Category"
+              style={{ width: "100px" }}
+            ></Column>
+            <Column
+              field="sku"
+              header="SKU Code"
+              style={{ width: "100px" }}
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="sku_description"
+              header="Description"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="sourcing_location"
+              header="Location"
+            ></Column>
+            <Column style={{ width: "90px" }} field="uom" header="UOM"></Column>
+            <Column
+              style={{ width: "50px" }}
+              field="abc_class"
+              header="ABC Class"
+            ></Column>
+            <Column
+              style={{ width: "70px" }}
+              field="xyz_class"
+              header="XYZ Class"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="movement_class"
+              header="Movement Class"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="purchase_price"
+              header="Purchase Price"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="sell_price"
+              header="Sell Price"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="margin"
+              header="Margin"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="moq"
+              header="MOQ"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="soh"
+              header="SOH"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="soh_days"
+              header="SOH Days"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="avg_demand_per_day"
+              header="Avg Demand / Day"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="stock_value"
+              header="Stock Value"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="stock_transit"
+              header="Stock Transit"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="open_po_qty"
+              header="Open PO Qty"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="open_so_qty"
+              header="Open SO Qty"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="lead_time_in_days"
+              header="Lead Time In Days"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="roq_units"
+              header="ROQ Units"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="safety_stock_units"
+              header="Safety Stock Units"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="min_units"
+              header="Min Units"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="max_units"
+              header="Max Units"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="tm_forecast_accuracy"
+              header="Twelve Month Forecast Accuracy"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="shortage_units"
+              header="Shortage Units"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="excess_units"
+              header="Excess Units"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="target_fill"
+              header="Target Fill"
+            ></Column>
+            <Column
+              style={{ width: "100px" }}
+              field="actual_fill"
+              header="Actual Fill"
+            ></Column>
+          </DataTable>
+        </div>
       </div>
     );
   }
