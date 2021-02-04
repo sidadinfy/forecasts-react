@@ -15,10 +15,16 @@ class Maintain extends React.Component {
     this.state = {
       selectedCategory: "",
       sku: "",
-      fromDateValue: new Date(),
-      toDateValue: new Date(),
+      fromDateValue: null,
+      toDateValue: null,
       categoryList: [],
       products: [],
+      filter: {
+        fromDateValue: null,
+        toDateValue: null,
+        selectedCategory: "",
+        sku: "",
+      },
     };
   }
 
@@ -86,7 +92,34 @@ class Maintain extends React.Component {
       });
   };
 
+  handleSearch = () => {
+    let allProducts = [...this.state.products];
+    let fromDateValue = this.state.filter && this.state.filter.fromDateValue;
+    let toDateValue = this.state.filter && this.state.filter.toDateValue;
+    if (fromDateValue && toDateValue) {
+      let filtered = allProducts.filter((item) => {
+        console.log(new Date(item.period) - toDateValue <= 0);
+        if (
+          new Date(item.period) >= fromDateValue &&
+          new Date(item.period) <= toDateValue
+        ) {
+          return item;
+        }
+        return null;
+      });
+      this.setState({ products: filtered });
+      console.log("Filtered", filtered);
+    }
+  };
+
+  handleReset = () => {
+    this.setState({ filter: {} }, () => {
+      this.getAllProducts();
+    });
+  };
+
   render() {
+    let { filter } = this.state;
     return (
       <>
         <Helmet>
@@ -105,10 +138,12 @@ class Maintain extends React.Component {
                   <div className="pr-4">From</div>
                   <div className="w-10/12">
                     <Datepicker
-                      value={this.state.fromDateValue}
+                      value={filter.fromDateValue}
                       style={{ width: "90.333333%" }}
                       handleDateValue={(val) => {
-                        this.setState({ fromDateValue: val });
+                        this.setState({
+                          filter: { ...this.state.filter, fromDateValue: val },
+                        });
                       }}
                     />
                   </div>
@@ -117,11 +152,16 @@ class Maintain extends React.Component {
                   <div className="pr-4">To</div>
                   <div className="w-10/12">
                     <Datepicker
-                      value={this.state.toDateValue}
+                      value={this.state.filter && this.state.filter.toDateValue}
                       style={{ width: "86.333333%" }}
-                      minDate={this.state.fromDateValue}
+                      disabled={
+                        this.state.filter && !this.state.filter.fromDateValue
+                      }
+                      minDate={filter.fromDateValue}
                       handleDateValue={(val) => {
-                        this.setState({ toDateValue: val });
+                        this.setState({
+                          filter: { ...this.state.filter, toDateValue: val },
+                        });
                       }}
                     />
                   </div>
@@ -156,20 +196,39 @@ class Maintain extends React.Component {
                 </div>
               </div>
             </div>
-            <div>
-              <Button
-                icon="pi pi-search"
-                className="p-button-raised p-button-rounded"
-                tooltip="Search"
-              />
+            <div className="flex items-center">
+              <div>
+                <Button
+                  icon="pi pi-search"
+                  className="p-button-raised p-button-rounded"
+                  tooltip="Search"
+                  tooltipOptions={{ position: "top" }}
+                  onClick={this.handleSearch}
+                />
+              </div>
+              <div className="ml-2">
+                <Button
+                  icon="pi pi-times"
+                  disabled={
+                    this.state.filter &&
+                    !this.state.filter.fromDateValue &&
+                    !this.state.filter.toDateValue
+                      ? true
+                      : false
+                  }
+                  className="p-button-rounded p-button-danger p-button-raised p-button-outlined"
+                  onClick={this.handleReset}
+                />
+              </div>
             </div>
           </div>
         </div>
-        <div className="max-w-5xl mx-auto my-5">
+        <div className="max-w-6xl mx-auto my-5 datatable-responsive-demo">
           <DataTable
             ref={this.df}
             value={this.state.products}
-            className="p-datatable-striped w-full"
+            className="p-datatable-striped datatable-responsive-demo w-full"
+            scrollable={true}
           >
             <Column
               headerStyle={{ textAlign: "center", width: "180px" }}
@@ -190,20 +249,20 @@ class Maintain extends React.Component {
               header="UOM"
             ></Column>
             <Column
-              headerStyle={{ textAlign: "center", width: "180px" }}
-              bodyStyle={{ textAlign: "center", width: "180px" }}
+              headerStyle={{ textAlign: "center", width: "120px" }}
+              bodyStyle={{ textAlign: "center", width: "120px" }}
               field="period"
               header="Period"
             ></Column>
             <Column
-              headerStyle={{ textAlign: "center" }}
-              bodyStyle={{ textAlign: "center" }}
+              headerStyle={{ textAlign: "center", width: "120px" }}
+              bodyStyle={{ textAlign: "center", width: "120px" }}
               field="stats_forecast"
               header="Statistical Forecast"
             ></Column>
             <Column
-              headerStyle={{ textAlign: "center" }}
-              bodyStyle={{ textAlign: "center" }}
+              headerStyle={{ textAlign: "center", width: "220px" }}
+              bodyStyle={{ textAlign: "center", width: "220px" }}
               field="rec_forecast"
               header="Recommended Forecast"
               body={(rowdata) => this.renderRecBody(rowdata)}
