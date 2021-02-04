@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { linkMaintain, linkMasterSKU } from "../routes";
+import { linkMaintain, linkMasterSKU, linkReviewReleaseOrder } from "../routes";
 class Header extends React.Component {
   render() {
     console.log("router", this.props.location);
@@ -25,6 +25,16 @@ class Header extends React.Component {
           }
         >
           MasterSKU
+        </NavLink>
+        <NavLink
+          to={linkReviewReleaseOrder}
+          className={
+            this.props.location.pathname === linkReviewReleaseOrder
+              ? "nav-link make-active"
+              : "nav-link"
+          }
+        >
+          Review & Release Order
         </NavLink>
       </nav>
     );

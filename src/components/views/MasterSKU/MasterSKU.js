@@ -75,7 +75,7 @@ class MasterSKU extends React.Component {
 
   render() {
     return (
-      <div className="App">
+      <>
         <Helmet>
           <meta charSet="utf-8" />
           <title>{linkNameMasterSKU}</title>
@@ -293,7 +293,7 @@ class MasterSKU extends React.Component {
             ></Column>
           </DataTable>
         </div>
-      </div>
+      </>
     );
   }
 }
