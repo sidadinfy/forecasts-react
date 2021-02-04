@@ -7,7 +7,7 @@ class SimpleDropdown extends React.Component {
       <Dropdown
         value={this.props.value}
         onChange={(e) => this.props.handleChange(e.value)}
-        placeholder="Select a City"
+        placeholder="Select a Category"
         {...this.props}
       />
     );
