@@ -7,11 +7,15 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
 import StaticDataService from "../../../services/DataService";
+import { Toast } from "primereact/toast";
 import Datepicker from "../../Datepicker/Datepicker";
+import Importer from "../../Importer/Importer";
 class Maintain extends React.Component {
   constructor(props) {
     super(props);
     this.df = React.createRef();
+    this.toastRef = React.createRef();
+    this.importRef = React.createRef();
     this.state = {
       selectedCategory: "",
       sku: "",
@@ -61,6 +65,7 @@ class Maintain extends React.Component {
     return (
       <div>
         <InputText
+          value={rowdata.rec_forecast}
           id={rowdata.id}
           type="text"
           placeholder="Recommended Forecast"
@@ -113,10 +118,94 @@ class Maintain extends React.Component {
   };
 
   handleReset = () => {
-    this.setState({ filter: {} }, () => {
+    this.setState({ filter: {}, products: [] }, () => {
       this.getAllProducts();
     });
   };
+
+  saveData = () => {
+    this.toastRef.current.show({
+      severity: "success",
+      summary: "Success Message",
+      detail: "Data Saved",
+    });
+  };
+
+  handleUploader = (event) => {
+    var reader = new FileReader();
+    let arr = [];
+    reader.onload = (e) => {
+      var rows = e.target.result.split("\n");
+      for (let i = 1; i < rows.length; i++) {
+        let obj = {};
+
+        let cells = rows[i].split(",");
+        for (let j = 0; j < cells.length; j++) {
+          cells[j] = cells[j].toString().replace(/["']/g, "");
+          if (j === 0) {
+            obj.product_category = cells[j];
+          }
+          if (j === 1) {
+            obj.sku_code = cells[j];
+          }
+          if (j === 2) {
+            obj.uom = cells[j];
+          }
+          if (j === 3) {
+            obj.period = cells[j];
+          }
+          if (j === 4) {
+            obj.stats_forecast = cells[j];
+          }
+          if (j === 5) {
+            obj.rec_forecast = cells[j];
+          }
+        }
+
+        arr.push(obj);
+        this.setState({
+          products: arr,
+        });
+      }
+    };
+    reader.onloadend = (e) => {
+      console.log("Loaded", e.loaded);
+      this.importRef.current.clear();
+    };
+    reader.readAsText(event.files[0]);
+    //event.files == files to upload
+  };
+
+  renderFooter() {
+    return (
+      <div className="flex justify-between mt-2">
+        <div>
+          <Button
+            label="Export"
+            className="p-button-info"
+            onClick={() => {
+              this.df.current.exportCSV();
+            }}
+          />
+        </div>
+        <div className="flex items-center">
+          <div className="mr-2">
+            <Importer
+              uploadBoxref={this.importRef}
+              myUploader={this.handleUploader}
+            />
+          </div>
+          <div>
+            <Button
+              label="Save"
+              className="p-button-success"
+              onClick={this.saveData}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   render() {
     let { filter } = this.state;
@@ -126,6 +215,7 @@ class Maintain extends React.Component {
           <meta charSet="utf-8" />
           <title>{linkNameMaintain}</title>
         </Helmet>
+        <Toast ref={this.toastRef} />
         <div className="mx-auto max-w-2xl">
           <div className="text-3xl font-bold text-center">
             Maintain Forecast
@@ -229,6 +319,7 @@ class Maintain extends React.Component {
             value={this.state.products}
             className="p-datatable-striped datatable-responsive-demo w-full"
             scrollable={true}
+            footer={this.renderFooter()}
           >
             <Column
               headerStyle={{ textAlign: "center", width: "180px" }}
@@ -268,13 +359,6 @@ class Maintain extends React.Component {
               body={(rowdata) => this.renderRecBody(rowdata)}
             ></Column>
           </DataTable>
-          <Button
-            label="Export"
-            className="p-button-success"
-            onClick={() => {
-              this.df.current.exportCSV();
-            }}
-          />
         </div>
       </>
     );
