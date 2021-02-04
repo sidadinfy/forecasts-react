@@ -16,6 +16,7 @@ class MasterSKU extends React.Component {
     this.state = {
       filter: {},
       data: [],
+      original: [],
       categoryList: [],
       sku: "",
       selectedCategory: "",
@@ -30,7 +31,7 @@ class MasterSKU extends React.Component {
   getMasterSKUData = () => {
     StaticDataService.getAllMasterSKUData().then((res) => {
       if (res) {
-        this.setState({ data: res.data });
+        this.setState({ data: res.data, original: res.data });
       }
     });
   };
@@ -62,7 +63,7 @@ class MasterSKU extends React.Component {
   };
 
   handleSearch = () => {
-    let allData = [...this.state.data];
+    let allData = [...this.state.original];
     let selectedCategory = this.state.selectedCategory;
     console.log("all", allData);
     let filtered = allData.filter(
@@ -146,6 +147,8 @@ class MasterSKU extends React.Component {
             value={this.state.data}
             className="p-datatable-striped datatable-responsive-demo w-full"
             scrollable={true}
+            paginator={true}
+            rows={10}
           >
             <Column
               field="category"
