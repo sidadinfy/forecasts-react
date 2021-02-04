@@ -22,7 +22,8 @@ class Maintain extends React.Component {
       fromDateValue: null,
       toDateValue: null,
       categoryList: [],
-      products: [],
+      data: [],
+      originalData: [],
       filter: {
         fromDateValue: null,
         toDateValue: null,
@@ -53,7 +54,7 @@ class Maintain extends React.Component {
     StaticDataService.getAllProducts()
       .then((res) => {
         if (res) {
-          this.setState({ products: res.data });
+          this.setState({ data: res.data, originalData: res.data });
         }
       })
       .catch((err) => {
@@ -70,14 +71,14 @@ class Maintain extends React.Component {
           type="text"
           placeholder="Recommended Forecast"
           onChange={(e) => {
-            let products = this.state.products;
-            if (products.length > 0) {
-              let currentProd = products.filter(
+            let maintainData = this.state.data;
+            if (maintainData.length > 0) {
+              let currentProd = maintainData.filter(
                 (item) => item.id === rowdata.id
               );
               currentProd[0].rec_forecast = e.target.value;
 
-              this.setState({ products });
+              this.setState({ maintainData });
             }
           }}
         />
@@ -98,11 +99,12 @@ class Maintain extends React.Component {
   };
 
   handleSearch = () => {
-    let allProducts = [...this.state.products];
+    let allProducts = [...this.state.originalData];
+    let filtered = [];
     let fromDateValue = this.state.filter && this.state.filter.fromDateValue;
     let toDateValue = this.state.filter && this.state.filter.toDateValue;
     if (fromDateValue && toDateValue) {
-      let filtered = allProducts.filter((item) => {
+      filtered = allProducts.filter((item) => {
         console.log(new Date(item.period) - toDateValue <= 0);
         if (
           new Date(item.period) >= fromDateValue &&
@@ -112,15 +114,24 @@ class Maintain extends React.Component {
         }
         return null;
       });
-      this.setState({ products: filtered });
-      console.log("Filtered", filtered);
     }
+    if (this.state.selectedCategory) {
+      filtered = allProducts.filter(
+        (item) =>
+          item.product_category.toLowerCase() === this.state.selectedCategory
+      );
+    }
+    this.setState({ data: filtered });
+    console.log("Filtered", filtered);
   };
 
   handleReset = () => {
-    this.setState({ filter: {}, products: [] }, () => {
-      this.getAllProducts();
-    });
+    this.setState(
+      { filter: {}, data: [], selectedCategory: "", sku: "" },
+      () => {
+        this.getAllProducts();
+      }
+    );
   };
 
   saveData = () => {
@@ -164,7 +175,7 @@ class Maintain extends React.Component {
 
         arr.push(obj);
         this.setState({
-          products: arr,
+          data: arr,
         });
       }
     };
@@ -302,7 +313,8 @@ class Maintain extends React.Component {
                   disabled={
                     this.state.filter &&
                     !this.state.filter.fromDateValue &&
-                    !this.state.filter.toDateValue
+                    !this.state.filter.toDateValue &&
+                    !this.state.selectedCategory
                       ? true
                       : false
                   }
@@ -316,7 +328,7 @@ class Maintain extends React.Component {
         <div className="max-w-6xl mx-auto my-5 datatable-responsive-demo">
           <DataTable
             ref={this.df}
-            value={this.state.products}
+            value={this.state.data}
             className="p-datatable-striped datatable-responsive-demo w-full"
             scrollable={true}
             footer={this.renderFooter()}
