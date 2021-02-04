@@ -9,11 +9,13 @@ import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
 import StaticDataService from "../../../services/DataService";
 import { Toast } from "primereact/toast";
 import Datepicker from "../../Datepicker/Datepicker";
+import Importer from "../../Importer/Importer";
 class Maintain extends React.Component {
   constructor(props) {
     super(props);
     this.df = React.createRef();
     this.toastRef = React.createRef();
+    this.importRef = React.createRef();
     this.state = {
       selectedCategory: "",
       sku: "",
@@ -63,6 +65,7 @@ class Maintain extends React.Component {
     return (
       <div>
         <InputText
+          value={rowdata.rec_forecast}
           id={rowdata.id}
           type="text"
           placeholder="Recommended Forecast"
@@ -115,7 +118,7 @@ class Maintain extends React.Component {
   };
 
   handleReset = () => {
-    this.setState({ filter: {} }, () => {
+    this.setState({ filter: {}, products: [] }, () => {
       this.getAllProducts();
     });
   };
@@ -126,6 +129,51 @@ class Maintain extends React.Component {
       summary: "Success Message",
       detail: "Data Saved",
     });
+  };
+
+  handleUploader = (event) => {
+    var reader = new FileReader();
+    let arr = [];
+    reader.onload = (e) => {
+      var rows = e.target.result.split("\n");
+      for (let i = 1; i < rows.length; i++) {
+        let obj = {};
+
+        let cells = rows[i].split(",");
+        for (let j = 0; j < cells.length; j++) {
+          cells[j] = cells[j].toString().replace(/["']/g, "");
+          if (j === 0) {
+            obj.product_category = cells[j];
+          }
+          if (j === 1) {
+            obj.sku_code = cells[j];
+          }
+          if (j === 2) {
+            obj.uom = cells[j];
+          }
+          if (j === 3) {
+            obj.period = cells[j];
+          }
+          if (j === 4) {
+            obj.stats_forecast = cells[j];
+          }
+          if (j === 5) {
+            obj.rec_forecast = cells[j];
+          }
+        }
+
+        arr.push(obj);
+        this.setState({
+          products: arr,
+        });
+      }
+    };
+    reader.onloadend = (e) => {
+      console.log("Loaded", e.loaded);
+      this.importRef.current.clear();
+    };
+    reader.readAsText(event.files[0]);
+    //event.files == files to upload
   };
 
   renderFooter() {
@@ -142,10 +190,9 @@ class Maintain extends React.Component {
         </div>
         <div className="flex items-center">
           <div className="mr-2">
-            <Button
-              label="Import"
-              className="p-button-warning"
-              onClick={this.saveData}
+            <Importer
+              uploadBoxref={this.importRef}
+              myUploader={this.handleUploader}
             />
           </div>
           <div>
