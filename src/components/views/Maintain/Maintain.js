@@ -6,106 +6,50 @@ import { linkNameMaintain } from "../../../routes";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
+import StaticDataService from "../../../services/DataService";
 import Datepicker from "../../Datepicker/Datepicker";
-const citySelectItems = [
-  { label: "New York", value: "NY" },
-  { label: "Rome", value: "RM" },
-  { label: "London", value: "LDN" },
-  { label: "Istanbul", value: "IST" },
-  { label: "Paris", value: "PRS" },
-];
 class Maintain extends React.Component {
   constructor(props) {
     super(props);
     this.df = React.createRef();
     this.state = {
-      value: "",
+      selectedCategory: "",
+      sku: "",
       fromDateValue: new Date(),
       toDateValue: new Date(),
-      products: [
-        {
-          id: "70a34114-1c75-4592-9866-26fb94b5a402",
-          product_category: "Dental",
-          sku_code: "ABC123",
-          uom: "Case",
-          period: "23-Apr-2020",
-          stats_forecast: 27,
-        },
-        {
-          id: "b4fa6945-15b8-4ded-8ffb-82c9015f5460",
-          product_category: "Detergents",
-          sku_code: "Tide",
-          uom: "Case",
-          period: "12-Nov-2020",
-          stats_forecast: 93,
-        },
-        {
-          id: "4513cec3-bc5f-4ce3-aee5-7acec96d5e65",
-          product_category: "Dental",
-          sku_code: "ABC123",
-          uom: "Case",
-          period: "05-Jul-2020",
-          stats_forecast: 59,
-        },
-        {
-          id: "243832d7-7a0e-4531-995c-9a2998dcec2a",
-          product_category: "Detergents",
-          sku_code: "Tide",
-          uom: "Case",
-          period: "21-Mar-2020",
-          stats_forecast: 39,
-        },
-        {
-          id: "ccfc31a1-d6b2-4b0b-8fa2-92d7b25456b0",
-          product_category: "Dental",
-          sku_code: "ABC123",
-          uom: "Case",
-          period: "03-Sep-2020",
-          stats_forecast: 20,
-        },
-        {
-          id: "7b59a582-31cf-4b87-8b58-fb006087b17c",
-          product_category: "Detergents",
-          sku_code: "Tide",
-          uom: "Case",
-          period: "24-May-2020",
-          stats_forecast: 29,
-        },
-        {
-          id: "4b648056-cd3a-474f-b28c-455610238ea7",
-          product_category: "Dental",
-          sku_code: "ABC123",
-          uom: "Case",
-          period: "08-Mar-2020",
-          stats_forecast: 70,
-        },
-        {
-          id: "d757a278-0ecd-4c9b-901f-d6e4c716ee32",
-          product_category: "Detergents",
-          sku_code: "Tide",
-          uom: "Case",
-          period: "22-Jun-2020",
-          stats_forecast: 53,
-        },
-        {
-          id: "03f5ad06-fa90-41d9-b5e4-c615d4dd1c92",
-          product_category: "Dental",
-          sku_code: "ABC123",
-          uom: "Case",
-          period: "11-Oct-2020",
-          stats_forecast: 28,
-        },
-        {
-          id: "3f4c09fc-a381-4a78-b489-f0ec78c8b6bb",
-          product_category: "Detergents",
-          sku_code: "Tide",
-          uom: "Case",
-          period: "15-Jan-2021",
-          stats_forecast: 98,
-        },
-      ],
+      categoryList: [],
+      products: [],
     };
   }
+
+  componentDidMount() {
+    this.getAllProducts();
+    this.getAllProductCategories();
+  }
+
+  getAllProductCategories = () => {
+    StaticDataService.getProductCategories()
+      .then((res) => {
+        if (res) {
+          this.setState({ categoryList: res.data });
+        }
+      })
+      .catch((err) => {
+        console.error(err.message);
+      });
+  };
+
+  getAllProducts = () => {
+    StaticDataService.getAllProducts()
+      .then((res) => {
+        if (res) {
+          this.setState({ products: res.data });
+        }
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
 
   renderRecBody = (rowdata) => {
     return (
@@ -129,6 +73,19 @@ class Maintain extends React.Component {
       </div>
     );
   };
+
+  getSKUBasedOnCategory = (category) => {
+    StaticDataService.getSKUBasedOnCategory(category)
+      .then((res) => {
+        if (res) {
+          this.setState({ sku: res.data.sku });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   render() {
     return (
       <>
@@ -140,57 +97,71 @@ class Maintain extends React.Component {
           <div className="text-3xl font-bold text-center">
             Maintain Forecast
           </div>
-          <div className="grid grid-cols-3 col-gap-0 mt-3">
-            <div>Forecast Period</div>
-            <div className="flex items-center">
-              <div className="pr-4">From</div>
-              <div className="w-10/12">
-                <Datepicker
-                  value={this.state.fromDateValue}
-                  style={{ width: "90.333333%" }}
-                  handleDateValue={(val) => {
-                    this.setState({ fromDateValue: val });
-                  }}
-                />
+          <div className="flex items-center w-full">
+            <div>
+              <div className="grid grid-cols-3 col-gap-0 mt-3">
+                <div>Forecast Period</div>
+                <div className="flex items-center">
+                  <div className="pr-4">From</div>
+                  <div className="w-10/12">
+                    <Datepicker
+                      value={this.state.fromDateValue}
+                      style={{ width: "90.333333%" }}
+                      handleDateValue={(val) => {
+                        this.setState({ fromDateValue: val });
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <div className="pr-4">To</div>
+                  <div className="w-10/12">
+                    <Datepicker
+                      value={this.state.toDateValue}
+                      style={{ width: "86.333333%" }}
+                      minDate={this.state.fromDateValue}
+                      handleDateValue={(val) => {
+                        this.setState({ toDateValue: val });
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 mt-2 col-gap-0 mb-6">
+                <div>Product Category</div>
+                <div className="">
+                  <SimpleDropdown
+                    options={this.state.categoryList}
+                    value={this.state.selectedCategory}
+                    handleChange={(val) => {
+                      this.setState({ selectedCategory: val }, () => {
+                        this.getSKUBasedOnCategory(val);
+                      });
+                    }}
+                    className="w-11/12"
+                  />
+                </div>
+                <div className="flex items-center">
+                  <div className="pr-4">SKU</div>
+                  <div className="w-10/12">
+                    <InputText
+                      disabled
+                      id="sku"
+                      type="text"
+                      value={this.state.sku}
+                      placeholder="SKU"
+                      className="w-10/12 "
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="flex items-center">
-              <div className="pr-4">To</div>
-              <div className="w-10/12">
-                <Datepicker
-                  value={this.state.toDateValue}
-                  style={{ width: "86.333333%" }}
-                  minDate={this.state.fromDateValue}
-                  handleDateValue={(val) => {
-                    this.setState({ toDateValue: val });
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 mt-2 col-gap-0 mb-6">
-            <div>Product Category</div>
-            <div className="">
-              <SimpleDropdown
-                options={citySelectItems}
-                value={this.state.value}
-                handleChange={(val) => {
-                  this.setState({ value: val });
-                }}
-                className="w-11/12"
+            <div>
+              <Button
+                icon="pi pi-search"
+                className="p-button-raised p-button-rounded"
+                tooltip="Search"
               />
-            </div>
-            <div className="flex items-center">
-              <div className="pr-4">SKU</div>
-              <div className="w-10/12">
-                <InputText
-                  disabled
-                  id="sku"
-                  type="text"
-                  placeholder="SKU"
-                  className="w-10/12 "
-                />
-              </div>
             </div>
           </div>
         </div>
