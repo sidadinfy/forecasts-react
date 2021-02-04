@@ -4,7 +4,6 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { linkNameMasterSKU } from "../../../routes";
 import { Button } from "primereact/button";
-import Datepicker from "../../Datepicker/Datepicker";
 import StaticDataService from "../../../services/DataService";
 
 import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
@@ -13,14 +12,19 @@ import { InputText } from "primereact/inputtext";
 class MasterSKU extends React.Component {
   constructor(props) {
     super(props);
+    this.dt = React.createRef();
     this.state = {
       filter: {},
       data: [],
+      categoryList: [],
+      sku: "",
+      selectedCategory: "",
     };
   }
 
   componentDidMount() {
     this.getMasterSKUData();
+    this.getProductCategories();
   }
 
   getMasterSKUData = () => {
@@ -31,15 +35,51 @@ class MasterSKU extends React.Component {
     });
   };
 
+  getProductCategories = () => {
+    StaticDataService.getProductCategories().then((res) => {
+      if (res) {
+        this.setState({ categoryList: res.data });
+      }
+    });
+  };
+
+  getSKUBasedOnCategory = (category) => {
+    StaticDataService.getSKUBasedOnCategory(category)
+      .then((res) => {
+        if (res) {
+          this.setState({ sku: res.data.sku });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  handleReset = () => {
+    this.setState({ selectedCategory: "", sku: "" }, () => {
+      this.getMasterSKUData();
+    });
+  };
+
+  handleSearch = () => {
+    let allData = [...this.state.data];
+    let selectedCategory = this.state.selectedCategory;
+    console.log("all", allData);
+    let filtered = allData.filter(
+      (item) => item.category.toLowerCase() === selectedCategory
+    );
+    console.log("Filtered", filtered);
+    this.setState({ data: filtered });
+  };
+
   render() {
-    let { filter } = this.state;
     return (
       <div className="App">
         <Helmet>
           <meta charSet="utf-8" />
           <title>{linkNameMasterSKU}</title>
         </Helmet>
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto max-w-3xl">
           <div className="text-3xl font-bold text-center">View SKU Master</div>
           <div className="flex items-center w-full mt-6">
             <div className="grid grid-cols-3 col-gap-0">
@@ -83,15 +123,18 @@ class MasterSKU extends React.Component {
               <div className="ml-2">
                 <Button
                   icon="pi pi-times"
-                  disabled={
-                    this.state.filter &&
-                    !this.state.filter.fromDateValue &&
-                    !this.state.filter.toDateValue
-                      ? true
-                      : false
-                  }
+                  disabled={!this.state.selectedCategory ? true : false}
                   className="p-button-rounded p-button-danger p-button-raised p-button-outlined"
                   onClick={this.handleReset}
+                />
+              </div>
+              <div className="ml-2">
+                <Button
+                  label="Export"
+                  className="p-button-info"
+                  onClick={() => {
+                    this.dt.current.exportCSV();
+                  }}
                 />
               </div>
             </div>
@@ -99,7 +142,7 @@ class MasterSKU extends React.Component {
         </div>
         <div className="my-5 datatable-responsive-demo">
           <DataTable
-            ref={this.df}
+            ref={this.dt}
             value={this.state.data}
             className="p-datatable-striped datatable-responsive-demo w-full"
             scrollable={true}
