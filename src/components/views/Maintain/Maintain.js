@@ -6,6 +6,7 @@ import { linkNameMaintain } from "../../../routes";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
+import Datepicker from "../../Datepicker/Datepicker";
 const citySelectItems = [
   { label: "New York", value: "NY" },
   { label: "Rome", value: "RM" },
@@ -19,6 +20,8 @@ class Maintain extends React.Component {
     this.df = React.createRef();
     this.state = {
       value: "",
+      fromDateValue: new Date(),
+      toDateValue: new Date(),
       products: [
         {
           id: "70a34114-1c75-4592-9866-26fb94b5a402",
@@ -142,22 +145,25 @@ class Maintain extends React.Component {
             <div className="flex items-center">
               <div className="pr-4">From</div>
               <div className="w-10/12">
-                <InputText
-                  id="firstname52"
-                  type="text"
-                  placeholder="Firstname"
+                <Datepicker
+                  value={this.state.fromDateValue}
                   style={{ width: "90.333333%" }}
+                  handleDateValue={(val) => {
+                    this.setState({ fromDateValue: val });
+                  }}
                 />
               </div>
             </div>
             <div className="flex items-center">
               <div className="pr-4">To</div>
               <div className="w-10/12">
-                <InputText
-                  id="firstname5"
-                  type="text"
-                  placeholder="Firstname"
+                <Datepicker
+                  value={this.state.toDateValue}
                   style={{ width: "86.333333%" }}
+                  minDate={this.state.fromDateValue}
+                  handleDateValue={(val) => {
+                    this.setState({ toDateValue: val });
+                  }}
                 />
               </div>
             </div>
