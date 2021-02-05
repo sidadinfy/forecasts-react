@@ -9,6 +9,7 @@ import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
 import StaticDataService from "../../../services/DataService";
 import { Toast } from "primereact/toast";
 import Datepicker from "../../Datepicker/Datepicker";
+import SearchDropdown from "../../SearchDropdown/SearchDropdown";
 import Importer from "../../Importer/Importer";
 class Maintain extends React.Component {
   constructor(props) {
@@ -36,6 +37,7 @@ class Maintain extends React.Component {
   componentDidMount() {
     this.getAllProducts();
     this.getAllProductCategories();
+    this.getAllSKUCodes();
   }
 
   getAllProductCategories = () => {
@@ -60,6 +62,14 @@ class Maintain extends React.Component {
       .catch((err) => {
         console.log(err.message);
       });
+  };
+
+  getAllSKUCodes = () => {
+    StaticDataService.getAllSKUCodes().then((res) => {
+      if (res) {
+        this.setState({ skuCodes: res.data, originalSKUCodes: res.data });
+      }
+    });
   };
 
   renderRecBody = (rowdata) => {
@@ -227,7 +237,7 @@ class Maintain extends React.Component {
           <title>{linkNameMaintain}</title>
         </Helmet>
         <Toast ref={this.toastRef} />
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto max-w-3xl">
           <div className="text-3xl font-bold text-center">
             Maintain Forecast
           </div>
@@ -237,10 +247,9 @@ class Maintain extends React.Component {
                 <div>Forecast Period</div>
                 <div className="flex items-center">
                   <div className="pr-4">From</div>
-                  <div className="w-10/12">
+                  <div>
                     <Datepicker
                       value={filter.fromDateValue}
-                      style={{ width: "90.333333%" }}
                       handleDateValue={(val) => {
                         this.setState({
                           filter: { ...this.state.filter, fromDateValue: val },
@@ -249,12 +258,11 @@ class Maintain extends React.Component {
                     />
                   </div>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center ml-4">
                   <div className="pr-4">To</div>
-                  <div className="w-10/12">
+                  <div>
                     <Datepicker
                       value={this.state.filter && this.state.filter.toDateValue}
-                      style={{ width: "86.333333%" }}
                       disabled={
                         this.state.filter && !this.state.filter.fromDateValue
                       }
@@ -268,36 +276,33 @@ class Maintain extends React.Component {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 mt-2 col-gap-0 mb-6">
+              <div className="grid grid-cols-3 mt-2 col-gap-0">
                 <div>Product Category</div>
-                <div className="">
-                  <SimpleDropdown
-                    options={this.state.categoryList}
-                    value={this.state.selectedCategory}
-                    handleChange={(val) => {
-                      this.setState({ selectedCategory: val }, () => {
-                        this.getSKUBasedOnCategory(val);
-                      });
-                    }}
-                    className="w-11/12"
-                  />
-                </div>
                 <div className="flex items-center">
-                  <div className="pr-4">SKU</div>
-                  <div className="w-10/12">
-                    <InputText
-                      disabled
-                      id="sku"
-                      type="text"
-                      value={this.state.sku}
-                      placeholder="SKU"
-                      className="w-10/12 "
+                  <div>
+                    <div className="pr-3 invisible">From</div>
+                  </div>
+                  <div>
+                    <SimpleDropdown
+                      options={this.state.categoryList}
+                      value={this.state.selectedCategory}
+                      handleChange={(val) => {
+                        this.setState({ selectedCategory: val }, () => {
+                          this.getSKUBasedOnCategory(val);
+                        });
+                      }}
                     />
+                  </div>
+                </div>
+                <div className="flex items-center ml-4">
+                  <div className="pr-4">SKU</div>
+                  <div>
+                    <SearchDropdown dropdown />
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center ml-4">
               <div>
                 <Button
                   icon="pi pi-search"
