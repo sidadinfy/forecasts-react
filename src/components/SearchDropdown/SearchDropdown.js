@@ -42,11 +42,10 @@ class SearchDropdown extends React.Component {
   render() {
     return (
       <AutoComplete
-        value={this.state.selectedCountry}
-        suggestions={this.state.filteredSKU}
-        completeMethod={this.searchCountry}
-        field="value"
-        onChange={(e) => this.setState({ selectedCountry: e.value })}
+        value={this.props.sku}
+        suggestions={this.props.suggestedSKU}
+        completeMethod={(e) => this.props.searchSKU(e)}
+        onChange={(e) => this.props.skuChangeHandler(e.value)}
         {...this.props}
       />
     );

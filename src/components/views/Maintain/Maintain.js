@@ -1,16 +1,16 @@
+import { Button } from "primereact/button";
+import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
+import { InputText } from "primereact/inputtext";
+import { Toast } from "primereact/toast";
 import React from "react";
 import { Helmet } from "react-helmet";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
 import { linkNameMaintain } from "../../../routes";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
 import StaticDataService from "../../../services/DataService";
-import { Toast } from "primereact/toast";
 import Datepicker from "../../Datepicker/Datepicker";
-import SearchDropdown from "../../SearchDropdown/SearchDropdown";
 import Importer from "../../Importer/Importer";
+import SearchDropdown from "../../SearchDropdown/SearchDropdown";
+import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
 class Maintain extends React.Component {
   constructor(props) {
     super(props);
@@ -18,18 +18,16 @@ class Maintain extends React.Component {
     this.toastRef = React.createRef();
     this.importRef = React.createRef();
     this.state = {
-      selectedCategory: "",
+      suggestedSKU: [],
       sku: "",
-      fromDateValue: null,
-      toDateValue: null,
       categoryList: [],
       data: [],
       originalData: [],
+      skuCodes: [],
       filter: {
         fromDateValue: null,
         toDateValue: null,
         selectedCategory: "",
-        sku: "",
       },
     };
   }
@@ -110,10 +108,11 @@ class Maintain extends React.Component {
 
   handleSearch = () => {
     let allProducts = [...this.state.originalData];
-    let filtered = [];
+    let filtered = [...this.state.originalData];
     let fromDateValue = this.state.filter && this.state.filter.fromDateValue;
     let toDateValue = this.state.filter && this.state.filter.toDateValue;
     if (fromDateValue && toDateValue) {
+      //Only From Date and To Date
       filtered = allProducts.filter((item) => {
         console.log(new Date(item.period) - toDateValue <= 0);
         if (
@@ -126,13 +125,81 @@ class Maintain extends React.Component {
       });
     }
     if (this.state.selectedCategory) {
+      //Only Selected Category
       filtered = allProducts.filter(
         (item) =>
           item.product_category.toLowerCase() === this.state.selectedCategory
       );
     }
+    if (this.state.sku) {
+      //Only SKU
+      filtered = allProducts.filter(
+        (item) => item.sku_code.toLowerCase() === this.state.sku.toLowerCase()
+      );
+    }
+    if (this.state.selectedCategory && this.state.sku) {
+      //Both Category and SKU
+      filtered = allProducts.filter((item) => {
+        if (
+          item.product_category.toLowerCase() === this.state.selectedCategory &&
+          item.sku_code.toLowerCase() === this.state.sku.toLowerCase()
+        ) {
+          return item;
+        } else {
+          return null;
+        }
+      });
+    }
+
+    if (fromDateValue && toDateValue && this.state.sku) {
+      //All From Date and To Date and SKU
+      filtered = allProducts.filter((item) => {
+        if (
+          new Date(item.period) >= fromDateValue &&
+          new Date(item.period) <= toDateValue &&
+          item.sku_code.toLowerCase() === this.state.sku.toLowerCase()
+        ) {
+          return item;
+        }
+        return null;
+      });
+    }
+
+    if (fromDateValue && toDateValue && this.state.selectedCategory) {
+      //All From Date and To Date and Category
+      filtered = allProducts.filter((item) => {
+        if (
+          new Date(item.period) >= fromDateValue &&
+          new Date(item.period) <= toDateValue &&
+          item.product_category.toLowerCase() === this.state.selectedCategory
+        ) {
+          return item;
+        }
+        return null;
+      });
+    }
+
+    if (
+      fromDateValue &&
+      toDateValue &&
+      this.state.selectedCategory &&
+      this.state.sku
+    ) {
+      //All From Date and To date and Category and SKu
+      filtered = allProducts.filter((item) => {
+        if (
+          new Date(item.period) >= fromDateValue &&
+          new Date(item.period) <= toDateValue &&
+          item.product_category.toLowerCase() === this.state.selectedCategory &&
+          item.sku_code.toLowerCase() === this.state.sku.toLowerCase()
+        ) {
+          return item;
+        }
+        return null;
+      });
+    }
+
     this.setState({ data: filtered });
-    console.log("Filtered", filtered);
   };
 
   handleReset = () => {
@@ -191,6 +258,7 @@ class Maintain extends React.Component {
     };
     reader.onloadend = (e) => {
       console.log("Loaded", e.loaded);
+      this.setState({ filter: {}, selectedCategory: "", sku: "" });
       this.importRef.current.clear();
     };
     reader.readAsText(event.files[0]);
@@ -227,6 +295,20 @@ class Maintain extends React.Component {
       </div>
     );
   }
+  searchSKU = (event) => {
+    let { skuCodes } = this.state;
+    setTimeout(() => {
+      let filteredCountries;
+      if (!event.query.trim().length) {
+        filteredCountries = [...skuCodes];
+      } else {
+        filteredCountries = skuCodes.filter((code) => {
+          return code.toLowerCase().startsWith(event.query.toLowerCase());
+        });
+      }
+      this.setState({ suggestedSKU: filteredCountries });
+    }, 250);
+  };
 
   render() {
     let { filter } = this.state;
@@ -252,7 +334,11 @@ class Maintain extends React.Component {
                       value={filter.fromDateValue}
                       handleDateValue={(val) => {
                         this.setState({
-                          filter: { ...this.state.filter, fromDateValue: val },
+                          filter: {
+                            ...this.state.filter,
+                            fromDateValue: val,
+                            toDateValue: val,
+                          },
                         });
                       }}
                     />
@@ -278,26 +364,30 @@ class Maintain extends React.Component {
               </div>
               <div className="grid grid-cols-3 mt-2 col-gap-0">
                 <div>Product Category</div>
-                <div className="flex items-center">
-                  <div>
-                    <div className="pr-3 invisible">From</div>
-                  </div>
-                  <div>
-                    <SimpleDropdown
-                      options={this.state.categoryList}
-                      value={this.state.selectedCategory}
-                      handleChange={(val) => {
-                        this.setState({ selectedCategory: val }, () => {
-                          this.getSKUBasedOnCategory(val);
-                        });
-                      }}
-                    />
-                  </div>
+                <div className="w-full">
+                  <SimpleDropdown
+                    style={{ width: "100%" }}
+                    options={this.state.categoryList}
+                    value={this.state.selectedCategory}
+                    handleChange={(val) => {
+                      this.setState({ selectedCategory: val }, () => {
+                        this.getSKUBasedOnCategory(val);
+                      });
+                    }}
+                  />
                 </div>
                 <div className="flex items-center ml-4">
                   <div className="pr-4">SKU</div>
                   <div>
-                    <SearchDropdown dropdown />
+                    <SearchDropdown
+                      dropdown
+                      sku={this.state.sku}
+                      suggestedSKU={this.state.suggestedSKU}
+                      searchSKU={this.searchSKU}
+                      skuChangeHandler={(val) => {
+                        this.setState({ sku: val });
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -319,7 +409,8 @@ class Maintain extends React.Component {
                     this.state.filter &&
                     !this.state.filter.fromDateValue &&
                     !this.state.filter.toDateValue &&
-                    !this.state.selectedCategory
+                    !this.state.selectedCategory &&
+                    !this.state.sku
                       ? true
                       : false
                   }
@@ -337,6 +428,7 @@ class Maintain extends React.Component {
             className="p-datatable-striped datatable-responsive-demo w-full"
             scrollable={true}
             footer={this.renderFooter()}
+            emptyMessage="No Data Found"
           >
             <Column
               headerStyle={{ textAlign: "center", width: "180px" }}

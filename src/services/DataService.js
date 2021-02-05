@@ -20,6 +20,7 @@ class StaticDataService {
       obj.sku = "Tide";
       obj.id = "13";
     }
+
     return new Promise(function (resolve, reject) {
       resolve({
         status: 200,
@@ -1023,90 +1024,27 @@ class StaticDataService {
       resolve({
         status: 200,
         data: [
-          {
-            value: "ABC111",
-            label: "ABC111",
-          },
-          {
-            value: "ABC112",
-            label: "ABC112",
-          },
-          {
-            value: "ABC113",
-            label: "ABC113",
-          },
-          {
-            value: "ABC114",
-            label: "ABC114",
-          },
-          {
-            value: "ABC115",
-            label: "ABC115",
-          },
-          {
-            value: "ABC116",
-            label: "ABC116",
-          },
-          {
-            value: "ABC117",
-            label: "ABC117",
-          },
-          {
-            value: "ABC118",
-            label: "ABC118",
-          },
-          {
-            value: "ABC119",
-            label: "ABC119",
-          },
-          {
-            value: "ABC120",
-            label: "ABC120",
-          },
-          {
-            value: "ABC121",
-            label: "ABC121",
-          },
-          {
-            value: "ABC122",
-            label: "ABC122",
-          },
-          {
-            value: "ABC123",
-            label: "ABC123",
-          },
-          {
-            value: "ABC124",
-            label: "ABC124",
-          },
-          {
-            value: "ABC125",
-            label: "ABC125",
-          },
-          {
-            value: "ABC126",
-            label: "ABC126",
-          },
-          {
-            value: "ABC127",
-            label: "ABC127",
-          },
-          {
-            value: "ABC128",
-            label: "ABC128",
-          },
-          {
-            value: "ABC129",
-            label: "ABC129",
-          },
-          {
-            value: "ABC130",
-            label: "ABC130",
-          },
-          {
-            value: "Tide",
-            label: "Tide",
-          },
+          "ABC111",
+          "ABC112",
+          "ABC113",
+          "ABC114",
+          "ABC115",
+          "ABC116",
+          "ABC117",
+          "ABC118",
+          "ABC119",
+          "ABC120",
+          "ABC121",
+          "ABC122",
+          "ABC123",
+          "ABC124",
+          "ABC125",
+          "ABC126",
+          "ABC127",
+          "ABC128",
+          "ABC129",
+          "ABC130",
+          "Tide",
         ],
       });
     });
