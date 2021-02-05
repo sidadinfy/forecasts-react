@@ -295,6 +295,7 @@ class Maintain extends React.Component {
       </div>
     );
   }
+
   searchSKU = (event) => {
     let { skuCodes } = this.state;
     setTimeout(() => {

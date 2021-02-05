@@ -7,7 +7,7 @@ import { linkNameReviewReleaseOrder } from "../../../routes";
 import { Button } from "primereact/button";
 import StaticDataService from "../../../services/DataService";
 import Datepicker from "../../Datepicker/Datepicker";
-
+import SearchDropdown from "../../SearchDropdown/SearchDropdown";
 import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
 import { InputText } from "primereact/inputtext";
 
@@ -20,12 +20,20 @@ class ReviewReleaseOrder extends React.Component {
       data: [],
       original: [],
       categoryList: [],
+      skuCodes: [],
+      originalSKUCodes: [],
       sku: "",
       selectedCategory: "",
     };
   }
 
   componentDidMount() {
+    this.getAllOrders();
+    this.getAllProductCategories();
+    this.getAllSKUCodes();
+  }
+
+  getAllOrders = () => {
     StaticDataService.getAllRevisedReleasedOrders()
       .then((res) => {
         if (res) {
@@ -35,7 +43,40 @@ class ReviewReleaseOrder extends React.Component {
       .catch((err) => {
         console.log(err);
       });
-  }
+  };
+
+  getAllSKUCodes = () => {
+    StaticDataService.getAllSKUCodes().then((res) => {
+      if (res) {
+        this.setState({ skuCodes: res.data, originalSKUCodes: res.data });
+      }
+    });
+  };
+
+  getAllProductCategories = () => {
+    StaticDataService.getProductCategories()
+      .then((res) => {
+        if (res) {
+          this.setState({ categoryList: res.data });
+        }
+      })
+      .catch((err) => {
+        console.error(err.message);
+      });
+  };
+
+  getSKUBasedOnCategory = (category) => {
+    StaticDataService.getSKUBasedOnCategory(category)
+      .then((res) => {
+        if (res) {
+          this.setState({ sku: res.data.sku });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   renderRevisedQty = (rowdata) => {
     return (
       <div>
@@ -59,6 +100,22 @@ class ReviewReleaseOrder extends React.Component {
       </div>
     );
   };
+
+  searchSKU = (event) => {
+    let { skuCodes } = this.state;
+    setTimeout(() => {
+      let filteredCountries;
+      if (!event.query.trim().length) {
+        filteredCountries = [...skuCodes];
+      } else {
+        filteredCountries = skuCodes.filter((code) => {
+          return code.toLowerCase().startsWith(event.query.toLowerCase());
+        });
+      }
+      this.setState({ suggestedSKU: filteredCountries });
+    }, 250);
+  };
+
   render() {
     let { filter } = this.state;
     return (
@@ -77,24 +134,26 @@ class ReviewReleaseOrder extends React.Component {
                 <div>Forecast Period</div>
                 <div className="flex items-center">
                   <div className="pr-4">From</div>
-                  <div className="w-10/12">
+                  <div>
                     <Datepicker
                       value={filter.fromDateValue}
-                      style={{ width: "90.333333%" }}
                       handleDateValue={(val) => {
                         this.setState({
-                          filter: { ...this.state.filter, fromDateValue: val },
+                          filter: {
+                            ...this.state.filter,
+                            fromDateValue: val,
+                            toDateValue: val,
+                          },
                         });
                       }}
                     />
                   </div>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center ml-4">
                   <div className="pr-4">To</div>
-                  <div className="w-10/12">
+                  <div>
                     <Datepicker
                       value={this.state.filter && this.state.filter.toDateValue}
-                      style={{ width: "86.333333%" }}
                       disabled={
                         this.state.filter && !this.state.filter.fromDateValue
                       }
@@ -108,10 +167,11 @@ class ReviewReleaseOrder extends React.Component {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 mt-2 col-gap-0 mb-6">
+              <div className="grid grid-cols-3 mt-2 col-gap-0">
                 <div>Product Category</div>
-                <div className="">
+                <div className="w-full">
                   <SimpleDropdown
+                    style={{ width: "100%" }}
                     options={this.state.categoryList}
                     value={this.state.selectedCategory}
                     handleChange={(val) => {
@@ -119,25 +179,25 @@ class ReviewReleaseOrder extends React.Component {
                         this.getSKUBasedOnCategory(val);
                       });
                     }}
-                    className="w-11/12"
                   />
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center ml-4">
                   <div className="pr-4">SKU</div>
-                  <div className="w-10/12">
-                    <InputText
-                      disabled
-                      id="sku"
-                      type="text"
-                      value={this.state.sku}
-                      placeholder="SKU"
-                      className="w-10/12 "
+                  <div>
+                    <SearchDropdown
+                      dropdown
+                      sku={this.state.sku}
+                      suggestedSKU={this.state.suggestedSKU}
+                      searchSKU={this.searchSKU}
+                      skuChangeHandler={(val) => {
+                        this.setState({ sku: val });
+                      }}
                     />
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center ml-4">
               <div>
                 <Button
                   icon="pi pi-search"
@@ -154,7 +214,8 @@ class ReviewReleaseOrder extends React.Component {
                     this.state.filter &&
                     !this.state.filter.fromDateValue &&
                     !this.state.filter.toDateValue &&
-                    !this.state.selectedCategory
+                    !this.state.selectedCategory &&
+                    !this.state.sku
                       ? true
                       : false
                   }
