@@ -1,29 +1,35 @@
-import React from "react";
-
-import { Helmet } from "react-helmet";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { linkNameReviewReleaseOrder } from "../../../routes";
 import { Button } from "primereact/button";
+import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
+import { InputText } from "primereact/inputtext";
+import React from "react";
+import { Helmet } from "react-helmet";
+import { linkNameReviewReleaseOrder } from "../../../routes";
 import StaticDataService from "../../../services/DataService";
 import Datepicker from "../../Datepicker/Datepicker";
+import Importer from "../../Importer/Importer";
 import SearchDropdown from "../../SearchDropdown/SearchDropdown";
 import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
-import { InputText } from "primereact/inputtext";
 
 class ReviewReleaseOrder extends React.Component {
   constructor(props) {
     super(props);
-    this.dt = React.createRef();
+    this.df = React.createRef();
+    this.importRef = React.createRef();
+
     this.state = {
-      filter: {},
+      filter: {
+        fromDateValue: null,
+        toDateValue: null,
+        selectedCategory: "",
+      },
+      importMap: {},
       data: [],
-      original: [],
+      originalData: [],
       categoryList: [],
       skuCodes: [],
       originalSKUCodes: [],
       sku: "",
-      selectedCategory: "",
     };
   }
 
@@ -37,7 +43,7 @@ class ReviewReleaseOrder extends React.Component {
     StaticDataService.getAllRevisedReleasedOrders()
       .then((res) => {
         if (res) {
-          this.setState({ data: res.data });
+          this.setState({ data: res.data, originalData: res.data });
         }
       })
       .catch((err) => {
@@ -77,28 +83,205 @@ class ReviewReleaseOrder extends React.Component {
       });
   };
 
+  handleSearch = () => {
+    debugger;
+    let allProducts = [...this.state.originalData];
+    let filtered = [...this.state.originalData];
+    let fromDateValue = this.state.filter && this.state.filter.fromDateValue;
+    let toDateValue = this.state.filter && this.state.filter.toDateValue;
+    if (fromDateValue && toDateValue) {
+      //Only From Date and To Date
+      filtered = allProducts.filter((item) => {
+        console.log(new Date(item.period) - toDateValue <= 0);
+        if (
+          new Date(item.period) >= fromDateValue &&
+          new Date(item.period) <= toDateValue
+        ) {
+          return item;
+        }
+        return null;
+      });
+    }
+    if (this.state.filter && this.state.filter.selectedCategory) {
+      debugger;
+      //Only Selected Category
+      filtered = allProducts.filter(
+        (item) =>
+          item.product_category.toLowerCase() ===
+          this.state.filter.selectedCategory
+      );
+    }
+    if (this.state.sku) {
+      //Only SKU
+      filtered = allProducts.filter(
+        (item) => item.sku.toLowerCase() === this.state.sku.toLowerCase()
+      );
+    }
+    if (this.state.filter.selectedCategory && this.state.sku) {
+      //Both Category and SKU
+      filtered = allProducts.filter((item) => {
+        if (
+          item.product_category.toLowerCase() ===
+            this.state.filter.selectedCategory &&
+          item.sku.toLowerCase() === this.state.sku.toLowerCase()
+        ) {
+          return item;
+        } else {
+          return null;
+        }
+      });
+    }
+
+    if (fromDateValue && toDateValue && this.state.sku) {
+      //All From Date and To Date and SKU
+      filtered = allProducts.filter((item) => {
+        if (
+          new Date(item.period) >= fromDateValue &&
+          new Date(item.period) <= toDateValue &&
+          item.sku.toLowerCase() === this.state.sku.toLowerCase()
+        ) {
+          return item;
+        }
+        return null;
+      });
+    }
+
+    if (
+      fromDateValue &&
+      toDateValue &&
+      this.state.filter &&
+      this.state.filter.selectedCategory
+    ) {
+      //All From Date and To Date and Category
+      filtered = allProducts.filter((item) => {
+        if (
+          new Date(item.period) >= fromDateValue &&
+          new Date(item.period) <= toDateValue &&
+          item.product_category.toLowerCase() ===
+            this.state.filter.selectedCategory
+        ) {
+          return item;
+        }
+        return null;
+      });
+    }
+
+    if (
+      fromDateValue &&
+      toDateValue &&
+      this.state.filter &&
+      this.state.filter.selectedCategory &&
+      this.state.sku
+    ) {
+      //All From Date and To date and Category and SKu
+      filtered = allProducts.filter((item) => {
+        if (
+          new Date(item.period) >= fromDateValue &&
+          new Date(item.period) <= toDateValue &&
+          item.product_category.toLowerCase() ===
+            this.state.filter.selectedCategory &&
+          item.sku.toLowerCase() === this.state.sku.toLowerCase()
+        ) {
+          return item;
+        }
+        return null;
+      });
+    }
+
+    this.setState({ data: filtered });
+  };
+
   renderRevisedQty = (rowdata) => {
     return (
       <div>
         <InputText
-          value={rowdata.rec_forecast}
+          value={rowdata.revised_order_qty}
           id={rowdata.id}
           type="text"
           placeholder="Revised Quantity"
           onChange={(e) => {
+            debugger;
             let maintainData = this.state.data;
             if (maintainData.length > 0) {
+              debugger;
               let currentProd = maintainData.filter(
                 (item) => item.id === rowdata.id
               );
-              currentProd[0].rec_forecast = e.target.value;
+              debugger;
+              currentProd[0].revised_order_qty = e.target.value;
 
-              this.setState({ maintainData });
+              this.setState({ data: maintainData });
             }
           }}
         />
       </div>
     );
+  };
+
+  handleReset = () => {
+    this.setState({ filter: {}, data: [], sku: "" }, () => {
+      this.getAllOrders();
+    });
+  };
+
+  handleUploader = (event) => {
+    var reader = new FileReader();
+    let arr = [];
+    let importMap = this.state.importMap;
+    reader.onload = (e) => {
+      var rows = e.target.result.split("\n");
+      for (let i = 1; i < rows.length; i++) {
+        let obj = {};
+        let cells = rows[i].split(",");
+        for (let j = 0; j < cells.length; j++) {
+          cells[j] = cells[j].toString().replace(/["']/g, "");
+          debugger;
+          if (j === 0) {
+            obj.product_category = cells[j];
+          }
+          if (j === 1) {
+            obj.sku = cells[j];
+          }
+          if (j === 2) {
+            obj.uom = cells[j];
+          }
+          if (j === 3) {
+            obj.lead_time = cells[j];
+          }
+          if (j === 4) {
+            obj.sourcing_location = cells[j];
+          }
+          if (j === 5) {
+            obj.days_of_stock = cells[j];
+          }
+          if (j === 6) {
+            obj.intransit_inventory_days = cells[j];
+          }
+          if (j === 7) {
+            obj.forecast_demand = cells[j];
+          }
+          if (j === 8) {
+            obj.recommended_order = cells[j];
+          }
+          if (j === 9) {
+            obj.revised_order_qty = cells[j];
+          }
+        }
+        obj["id"] = Math.abs(i - 1);
+        arr.push(obj);
+        this.setState({
+          data: arr,
+        });
+        debugger;
+      }
+    };
+    reader.onloadend = (e) => {
+      console.log("Loaded", e.loaded);
+      this.setState({ filter: {}, selectedCategory: "", sku: "" });
+      this.importRef.current.clear();
+    };
+    reader.readAsText(event.files[0]);
+    //event.files == files to upload
   };
 
   searchSKU = (event) => {
@@ -115,6 +298,37 @@ class ReviewReleaseOrder extends React.Component {
       this.setState({ suggestedSKU: filteredCountries });
     }, 250);
   };
+
+  renderFooter() {
+    return (
+      <div className="flex justify-between mt-2">
+        <div>
+          <Button
+            label="Export"
+            className="p-button-info"
+            onClick={() => {
+              this.df.current.exportCSV();
+            }}
+          />
+        </div>
+        <div className="flex items-center">
+          <div className="mr-2">
+            <Importer
+              uploadBoxref={this.importRef}
+              myUploader={this.handleUploader}
+            />
+          </div>
+          <div>
+            <Button
+              label="Save"
+              className="p-button-success"
+              onClick={this.saveData}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   render() {
     let { filter } = this.state;
@@ -173,11 +387,21 @@ class ReviewReleaseOrder extends React.Component {
                   <SimpleDropdown
                     style={{ width: "100%" }}
                     options={this.state.categoryList}
-                    value={this.state.selectedCategory}
+                    value={
+                      this.state.filter && this.state.filter.selectedCategory
+                    }
                     handleChange={(val) => {
-                      this.setState({ selectedCategory: val }, () => {
-                        this.getSKUBasedOnCategory(val);
-                      });
+                      this.setState(
+                        {
+                          filter: {
+                            ...this.state.filter,
+                            selectedCategory: val,
+                          },
+                        },
+                        () => {
+                          this.getSKUBasedOnCategory(val);
+                        }
+                      );
                     }}
                   />
                 </div>
@@ -214,7 +438,7 @@ class ReviewReleaseOrder extends React.Component {
                     this.state.filter &&
                     !this.state.filter.fromDateValue &&
                     !this.state.filter.toDateValue &&
-                    !this.state.selectedCategory &&
+                    !this.state.filter.selectedCategory &&
                     !this.state.sku
                       ? true
                       : false
@@ -232,6 +456,8 @@ class ReviewReleaseOrder extends React.Component {
             value={this.state.data}
             className="p-datatable-striped datatable-responsive-demo w-full"
             scrollable={true}
+            emptyMessage="No Data Found"
+            footer={this.renderFooter()}
           >
             <Column
               headerStyle={{ textAlign: "center", width: "180px" }}
