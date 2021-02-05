@@ -20,6 +20,7 @@ class StaticDataService {
       obj.sku = "Tide";
       obj.id = "13";
     }
+
     return new Promise(function (resolve, reject) {
       resolve({
         status: 200,

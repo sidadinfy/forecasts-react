@@ -278,21 +278,17 @@ class Maintain extends React.Component {
               </div>
               <div className="grid grid-cols-3 mt-2 col-gap-0">
                 <div>Product Category</div>
-                <div className="flex items-center">
-                  <div>
-                    <div className="pr-3 invisible">From</div>
-                  </div>
-                  <div>
-                    <SimpleDropdown
-                      options={this.state.categoryList}
-                      value={this.state.selectedCategory}
-                      handleChange={(val) => {
-                        this.setState({ selectedCategory: val }, () => {
-                          this.getSKUBasedOnCategory(val);
-                        });
-                      }}
-                    />
-                  </div>
+                <div className="w-full">
+                  <SimpleDropdown
+                    style={{ width: "100%" }}
+                    options={this.state.categoryList}
+                    value={this.state.selectedCategory}
+                    handleChange={(val) => {
+                      this.setState({ selectedCategory: val }, () => {
+                        this.getSKUBasedOnCategory(val);
+                      });
+                    }}
+                  />
                 </div>
                 <div className="flex items-center ml-4">
                   <div className="pr-4">SKU</div>
