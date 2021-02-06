@@ -11,6 +11,7 @@ import Datepicker from "../../Datepicker/Datepicker";
 import Importer from "../../Importer/Importer";
 import SearchDropdown from "../../SearchDropdown/SearchDropdown";
 import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
+import axios from "axios";
 class Maintain extends React.Component {
   constructor(props) {
     super(props);
@@ -36,6 +37,10 @@ class Maintain extends React.Component {
     this.getAllProducts();
     this.getAllProductCategories();
     this.getAllSKUCodes();
+
+    axios.get("/api").then((res) => {
+      console.log("GET", res.data);
+    });
   }
 
   getAllProductCategories = () => {
