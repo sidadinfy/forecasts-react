@@ -227,7 +227,6 @@ class ReviewReleaseOrder extends React.Component {
   handleUploader = (event) => {
     var reader = new FileReader();
     let arr = [];
-    let importMap = this.state.importMap;
     reader.onload = (e) => {
       var rows = e.target.result.split("\n");
       for (let i = 1; i < rows.length; i++) {

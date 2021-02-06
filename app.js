@@ -1,15 +1,14 @@
-//require("dotenv").config(); // Configure dotenv to load in the .env file
+require("dotenv").config(); // Configure dotenv to load in the .env file
 
 const express = require("express");
 const bodyParser = require("body-parser");
-//const userRoutes = require("./api/routes/User");
-//const postRoutes = require("./api/routes/Posts");
+const maintainRoutes = require("./api/routes/Maintain");
 const morgan = require("morgan");
 const app = express();
 //
-//const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
-/* mongoose
+mongoose
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -17,7 +16,7 @@ const app = express();
   .then(() => {
     console.log("Database Connected");
   });
- */
+
 app.use(morgan("dev"));
 //app.use("/uploads", express.static("uploads"));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -35,6 +34,8 @@ app.use((req, res, next) => {
 app.get("/api", (req, res) => {
   res.status(200).json({ message: "Api is Working" });
 });
+
+app.use("/maintain", maintainRoutes);
 
 /* 
 app.use("/products", productRoutes);
