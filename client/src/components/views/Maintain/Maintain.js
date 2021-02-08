@@ -25,6 +25,7 @@ class Maintain extends React.Component {
       sku: "",
       categoryList: [],
       data: [],
+      dataChanged: false,
       originalData: [],
       skuCodes: [],
       filter: {
@@ -81,7 +82,11 @@ class Maintain extends React.Component {
     return (
       <div>
         <InputText
-          value={rowdata.rec_forecast ? rowdata.rec_forecast : ""}
+          value={
+            rowdata.rec_forecast !== "" || rowdata.rec_forecast !== null
+              ? rowdata.rec_forecast
+              : ""
+          }
           id={rowdata.id}
           type="text"
           placeholder="Recommended Forecast"
@@ -231,18 +236,41 @@ class Maintain extends React.Component {
           .then((res) => {
             if (res) {
               console.log("Success", data[key]["_id"]);
+              this.setState({ loading: true }, () => {
+                this.getAllProducts();
+              });
             }
           })
           .catch((err) => {
             console.log("Error", data);
           });
-
-        this.toastRef.current.show({
-          severity: "success",
-          summary: "Success Message",
-          detail: "Data Saved",
-        });
       }
+      this.toastRef.current.show({
+        severity: "success",
+        summary: "Success Message",
+        detail: "Data Saved",
+      });
+    } else if (this.state.dataChanged) {
+      let data = this.state.data;
+      data.map((item, index) => {
+        MaintainService.updateSingleMaintain(item["_id"], item)
+          .then((res) => {
+            if (res) {
+              console.log("Success - Export", item);
+              this.setState({ loading: true }, () => {
+                this.getAllProducts();
+              });
+            }
+          })
+          .catch((err) => {
+            console.log("Error", err);
+          });
+      });
+      this.toastRef.current.show({
+        severity: "success",
+        summary: "Data Successfully Imported",
+        detail: "Data Saved",
+      });
     }
   };
 
@@ -258,25 +286,27 @@ class Maintain extends React.Component {
         for (let j = 0; j < cells.length; j++) {
           cells[j] = cells[j].toString().replace(/["']/g, "");
           if (j === 0) {
-            obj.product_category = cells[j];
+            obj._id = cells[j];
           }
           if (j === 1) {
-            obj.sku_code = cells[j];
+            obj.product_category = cells[j];
           }
           if (j === 2) {
-            obj.uom = cells[j];
+            obj.sku_code = cells[j];
           }
           if (j === 3) {
-            obj.period = cells[j];
+            obj.uom = cells[j];
           }
           if (j === 4) {
-            obj.stats_forecast = cells[j];
+            obj.period = cells[j];
           }
           if (j === 5) {
+            obj.stats_forecast = cells[j];
+          }
+          if (j === 6) {
             obj.rec_forecast = cells[j];
           }
         }
-
         arr.push(obj);
         this.setState({
           data: arr,
@@ -285,7 +315,12 @@ class Maintain extends React.Component {
     };
     reader.onloadend = (e) => {
       console.log("Loaded", e.loaded);
-      this.setState({ filter: {}, selectedCategory: "", sku: "" });
+      this.setState({
+        filter: {},
+        selectedCategory: "",
+        sku: "",
+        dataChanged: true,
+      });
       this.importRef.current.clear();
     };
     reader.readAsText(event.files[0]);
@@ -337,7 +372,6 @@ class Maintain extends React.Component {
       this.setState({ suggestedSKU: filteredCountries });
     }, 250);
   };
-
   render() {
     let { filter } = this.state;
     return (
@@ -459,6 +493,12 @@ class Maintain extends React.Component {
             emptyMessage="No Data Found"
             loading={this.state.loading}
           >
+            <Column
+              style={{ display: "none" }}
+              field="_id"
+              header="ID"
+              body={(rowdata) => ""}
+            ></Column>
             <Column
               headerStyle={{ textAlign: "center", width: "180px" }}
               bodyStyle={{ textAlign: "center", width: "180px" }}
