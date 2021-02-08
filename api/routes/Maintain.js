@@ -22,6 +22,31 @@ router.get("/view", (req, res, next) => {
     .catch((err) => console.log(err));
 });
 
+//Updated Single Forecast ID
+router.put("/save/:id", (req, res) => {
+  const id = req.params.id;
+  const updateOPS = {};
+  for (const ops in req.body) {
+    console.log("VALUE", ops);
+    updateOPS[ops] = req.body[ops];
+  }
+
+  MaintainSchema.updateOne({ _id: id }, { $set: updateOPS })
+    .exec()
+    .then((result) => {
+      console.log("FORECAST UPDATED", result);
+      res.status(200).json({
+        message: "Forecast updated",
+      });
+    })
+    .catch((err) => {
+      console.log("ERROR", err);
+      res.status(500).json({
+        error: err,
+      });
+    });
+});
+
 router.post("/add", (req, res) => {
   const newMaintainItem = new MaintainSchema({
     _id: new mongoose.Types.ObjectId(),
@@ -57,6 +82,25 @@ router.post("/add", (req, res) => {
     .catch((err) => {
       console.log(err);
       res.status(500).json({
+        error: err,
+      });
+    });
+});
+
+router.delete("/remove/:id", (req, res) => {
+  const id = req.params.id;
+  MaintainSchema.deleteOne({ _id: id })
+    .exec()
+    .then((result) => {
+      res.status(200).json({
+        message: "Maintain Data Deleted",
+        id: req.params.id,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({
+        message: "Given ID Not Available In DB",
         error: err,
       });
     });

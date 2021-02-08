@@ -6,7 +6,7 @@ const maintainSchema = mongoose.Schema({
   uom: { type: String, required: true },
   period: { type: Date, required: true },
   stats_forecast: { type: Number, default: 10 },
-  rec_forecast: { type: Number },
+  rec_forecast: { type: Number, default: 0 },
 });
 
 module.exports = mongoose.model("Maintain", maintainSchema);

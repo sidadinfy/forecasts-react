@@ -21,6 +21,7 @@ class Maintain extends React.Component {
     this.state = {
       suggestedSKU: [],
       loading: true,
+      updatedItems: {},
       sku: "",
       categoryList: [],
       data: [],
@@ -38,9 +39,6 @@ class Maintain extends React.Component {
     this.getAllProducts();
     this.getAllProductCategories();
     this.getAllSKUCodes();
-    MaintainService.getAllForecasts().then((res) => {
-      console.log("MAINTAIN SERVICE", res.data);
-    });
   }
 
   getAllProductCategories = () => {
@@ -83,7 +81,7 @@ class Maintain extends React.Component {
     return (
       <div>
         <InputText
-          value={rowdata.rec_forecast}
+          value={rowdata.rec_forecast ? rowdata.rec_forecast : ""}
           id={rowdata.id}
           type="text"
           placeholder="Recommended Forecast"
@@ -93,9 +91,14 @@ class Maintain extends React.Component {
               let currentProd = maintainData.filter(
                 (item) => item._id === rowdata._id
               );
-              currentProd[0].rec_forecast = e.target.value;
-
-              this.setState({ maintainData });
+              currentProd[0].rec_forecast = e.target.value || "";
+              this.setState({
+                data: maintainData,
+                updatedItems: {
+                  ...this.state.updatedItems,
+                  [rowdata._id]: rowdata,
+                },
+              });
             }
           }}
         />
@@ -221,11 +224,26 @@ class Maintain extends React.Component {
   };
 
   saveData = () => {
-    this.toastRef.current.show({
-      severity: "success",
-      summary: "Success Message",
-      detail: "Data Saved",
-    });
+    if (Object.keys(this.state.updatedItems).length > 0) {
+      let data = this.state.updatedItems;
+      for (const key in data) {
+        MaintainService.updateSingleMaintain(data[key]["_id"], data[key])
+          .then((res) => {
+            if (res) {
+              console.log("Success", data[key]["_id"]);
+            }
+          })
+          .catch((err) => {
+            console.log("Error", data);
+          });
+
+        this.toastRef.current.show({
+          severity: "success",
+          summary: "Success Message",
+          detail: "Data Saved",
+        });
+      }
+    }
   };
 
   handleUploader = (event) => {

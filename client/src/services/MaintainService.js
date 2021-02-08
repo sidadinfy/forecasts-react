@@ -6,6 +6,10 @@ class MaintainService {
   getAllForecasts() {
     return axios.get(`${DEFAULT_API_PATH}/view`);
   }
+
+  updateSingleMaintain(id, data) {
+    return axios.put(`${DEFAULT_API_PATH}/save/${id}`, data);
+  }
 }
 
 export default new MaintainService();
