@@ -7,11 +7,11 @@ import React from "react";
 import { Helmet } from "react-helmet";
 import { linkNameMaintain } from "../../../routes";
 import StaticDataService from "../../../services/DataService";
+import MaintainService from "../../../services/MaintainService";
 import Datepicker from "../../Datepicker/Datepicker";
 import Importer from "../../Importer/Importer";
 import SearchDropdown from "../../SearchDropdown/SearchDropdown";
 import SimpleDropdown from "../../SimpleDropdown/SimpleDropdown";
-import axios from "axios";
 class Maintain extends React.Component {
   constructor(props) {
     super(props);
@@ -20,6 +20,8 @@ class Maintain extends React.Component {
     this.importRef = React.createRef();
     this.state = {
       suggestedSKU: [],
+      loading: true,
+      updatedItems: {},
       sku: "",
       categoryList: [],
       data: [],
@@ -37,10 +39,6 @@ class Maintain extends React.Component {
     this.getAllProducts();
     this.getAllProductCategories();
     this.getAllSKUCodes();
-
-    axios.get("/api").then((res) => {
-      console.log("GET", res.data);
-    });
   }
 
   getAllProductCategories = () => {
@@ -56,14 +54,18 @@ class Maintain extends React.Component {
   };
 
   getAllProducts = () => {
-    StaticDataService.getAllProducts()
+    MaintainService.getAllForecasts()
       .then((res) => {
         if (res) {
-          this.setState({ data: res.data, originalData: res.data });
+          this.setState({
+            data: res.data,
+            originalData: res.data,
+            loading: false,
+          });
         }
       })
       .catch((err) => {
-        console.log(err.message);
+        console.log("err", err);
       });
   };
 
@@ -79,7 +81,7 @@ class Maintain extends React.Component {
     return (
       <div>
         <InputText
-          value={rowdata.rec_forecast}
+          value={rowdata.rec_forecast ? rowdata.rec_forecast : ""}
           id={rowdata.id}
           type="text"
           placeholder="Recommended Forecast"
@@ -87,11 +89,16 @@ class Maintain extends React.Component {
             let maintainData = this.state.data;
             if (maintainData.length > 0) {
               let currentProd = maintainData.filter(
-                (item) => item.id === rowdata.id
+                (item) => item._id === rowdata._id
               );
-              currentProd[0].rec_forecast = e.target.value;
-
-              this.setState({ maintainData });
+              currentProd[0].rec_forecast = e.target.value || "";
+              this.setState({
+                data: maintainData,
+                updatedItems: {
+                  ...this.state.updatedItems,
+                  [rowdata._id]: rowdata,
+                },
+              });
             }
           }}
         />
@@ -217,11 +224,26 @@ class Maintain extends React.Component {
   };
 
   saveData = () => {
-    this.toastRef.current.show({
-      severity: "success",
-      summary: "Success Message",
-      detail: "Data Saved",
-    });
+    if (Object.keys(this.state.updatedItems).length > 0) {
+      let data = this.state.updatedItems;
+      for (const key in data) {
+        MaintainService.updateSingleMaintain(data[key]["_id"], data[key])
+          .then((res) => {
+            if (res) {
+              console.log("Success", data[key]["_id"]);
+            }
+          })
+          .catch((err) => {
+            console.log("Error", data);
+          });
+
+        this.toastRef.current.show({
+          severity: "success",
+          summary: "Success Message",
+          detail: "Data Saved",
+        });
+      }
+    }
   };
 
   handleUploader = (event) => {
@@ -435,6 +457,7 @@ class Maintain extends React.Component {
             scrollable={true}
             footer={this.renderFooter()}
             emptyMessage="No Data Found"
+            loading={this.state.loading}
           >
             <Column
               headerStyle={{ textAlign: "center", width: "180px" }}
@@ -459,6 +482,7 @@ class Maintain extends React.Component {
               bodyStyle={{ textAlign: "center", width: "120px" }}
               field="period"
               header="Period"
+              body={(rowdata) => new Date(rowdata.period).toLocaleDateString()}
             ></Column>
             <Column
               headerStyle={{ textAlign: "center", width: "120px" }}
