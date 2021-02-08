@@ -17,7 +17,7 @@ class StaticDataService {
       obj.sku = "ABC123";
       obj.id = "12";
     } else if (category === "detergents") {
-      obj.sku = "Tide";
+      obj.sku = "ABC100";
       obj.id = "13";
     }
 

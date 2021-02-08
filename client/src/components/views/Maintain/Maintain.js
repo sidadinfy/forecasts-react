@@ -236,6 +236,9 @@ class Maintain extends React.Component {
           .then((res) => {
             if (res) {
               console.log("Success", data[key]["_id"]);
+              this.setState({ loading: true }, () => {
+                this.getAllProducts();
+              });
             }
           })
           .catch((err) => {
@@ -254,6 +257,9 @@ class Maintain extends React.Component {
           .then((res) => {
             if (res) {
               console.log("Success - Export", item);
+              this.setState({ loading: true }, () => {
+                this.getAllProducts();
+              });
             }
           })
           .catch((err) => {
