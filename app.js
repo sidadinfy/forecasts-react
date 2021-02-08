@@ -1,5 +1,6 @@
 require("dotenv").config(); // Configure dotenv to load in the .env file
 
+const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
 const maintainRoutes = require("./api/routes/Maintain");
@@ -16,9 +17,10 @@ mongoose
   .then(() => {
     console.log("Database Connected");
   });
-
-app.use(morgan("dev"));
-//app.use("/uploads", express.static("uploads"));
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use((req, res, next) => {
@@ -31,20 +33,19 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/api", (req, res) => {
-  res.status(200).json({ message: "Api is Working" });
-});
-
 app.use("/maintain", maintainRoutes);
 
-/* 
-app.use("/products", productRoutes);
-app.use("/orders", orderRoutes); */
-//app.use("/user", userRoutes);
-//app.use("/posts", postRoutes);
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "/frontend/build")));
 
-//! If the Routes comes past the above middleware
-//! Then there is an Error, So all Error must be handled after the accepted routes
+  app.get("*", (req, res) =>
+    res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"))
+  );
+} else {
+  app.get("/api", (req, res) => {
+    res.status(200).json({ message: "Api is Working" });
+  });
+}
 
 app.use((req, res, next) => {
   const error = new Error("Not Found");
