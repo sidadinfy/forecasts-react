@@ -1,0 +1,2 @@
+(this["webpackJsonpforecasts-react"]=this["webpackJsonpforecasts-react"]||[]).push([[10],{43:function(t,e,a){"use strict";a.r(e);var n=a(14),r=a(15),c=a(17),s=a(16),i=a(0),u=a.n(i),o=a(5),p=function(t){Object(c.a)(a,t);var e=Object(s.a)(a);function a(){return Object(n.a)(this,a),e.apply(this,arguments)}return Object(r.a)(a,[{key:"render",value:function(){return Object(o.jsx)("div",{children:"Create Maintain Page"})}}]),a}(u.a.Component);e.default=p}}]);
+//# sourceMappingURL=10.8e2da043.chunk.js.map
