@@ -3,12 +3,14 @@ import React from "react";
 export const linkMaintain = "/";
 export const linkMasterSKU = "/mastersku";
 export const linkReviewReleaseOrder = "/revieworder";
+export const linkCreateMaintain = "/create";
 //Links
 
 //Link Names
 export const linkNameMaintain = "Maintain Forecasts";
 export const linkNameMasterSKU = "Master SKU";
 export const linkNameReviewReleaseOrder = "Review And Release Order";
+export const linkNameCreateMaintain = "Create Forecast Item";
 //Link Names
 
 const Maintain = React.lazy(() =>
@@ -19,6 +21,10 @@ const MasterSKU = React.lazy(() =>
 );
 const ReviewReleaseOrder = React.lazy(() =>
   import("./components/views/ReviewReleaseOrder/ReviewReleaseOrder")
+);
+
+const CreateMaintain = React.lazy(() =>
+  import("./components/views/CreateMaintain/CreateMaintain")
 );
 const routes = [
   {
@@ -38,6 +44,12 @@ const routes = [
     exact: true,
     name: linkNameReviewReleaseOrder,
     component: ReviewReleaseOrder,
+  },
+  {
+    path: linkCreateMaintain,
+    exact: true,
+    name: linkNameCreateMaintain,
+    component: CreateMaintain,
   },
 ];
 
