@@ -18,6 +18,17 @@ class CreateMaintain extends React.Component {
     };
   }
 
+  resetFields = () => {
+    this.setState({
+      productCategory: "",
+      skuCode: "",
+      UOM: "",
+      period: new Date(),
+      statsForecast: 0,
+      recForecast: 0,
+    });
+  };
+
   addNewMaintainItem = () => {
     if (this.state.productCategory && this.state.skuCode && this.state.UOM) {
       let myObj = {
@@ -32,7 +43,10 @@ class CreateMaintain extends React.Component {
         .then((res) => {
           if (res) {
             console.log("Success");
-            this.setState({ formInvalid: false, showSuccessMessage: true });
+            this.setState(
+              { formInvalid: false, showSuccessMessage: true },
+              () => this.resetFields()
+            );
           }
         })
         .catch((err) => {
