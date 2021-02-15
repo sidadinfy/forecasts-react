@@ -30,15 +30,15 @@ class CreateMaintain extends React.Component {
   };
 
   addNewMaintainItem = () => {
+    let myObj = {
+      product_category: this.state.productCategory,
+      sku_code: this.state.skuCode,
+      uom: this.state.UOM,
+      period: this.state.period,
+      stats_forecast: this.state.statsForecast,
+      rec_forecast: this.state.recForecast,
+    };
     if (this.state.productCategory && this.state.skuCode && this.state.UOM) {
-      let myObj = {
-        product_category: this.state.productCategory,
-        sku_code: this.state.skuCode,
-        uom: this.state.UOM,
-        period: this.state.period,
-        stats_forecast: this.state.statsForecast,
-        rec_forecast: this.state.recForecast,
-      };
       MaintainService.addNewMaintainItem(myObj)
         .then((res) => {
           if (res) {
@@ -113,7 +113,7 @@ class CreateMaintain extends React.Component {
             <label htmlFor="city">Statistical Forecast</label>
             <InputText
               value={this.state.statsForecast}
-              onChange={(e) => this.setState({ statsForecast: e.value })}
+              onChange={(e) => this.setState({ statsForecast: e.target.value })}
               type="number"
             />
           </div>
@@ -121,7 +121,7 @@ class CreateMaintain extends React.Component {
             <label htmlFor="zip">Recommended Forecast</label>
             <InputText
               value={this.state.recForecast}
-              onChange={(e) => this.setState({ recForecast: e.value })}
+              onChange={(e) => this.setState({ recForecast: e.target.value })}
               type="number"
             />
           </div>

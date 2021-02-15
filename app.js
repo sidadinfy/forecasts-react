@@ -51,9 +51,9 @@ app.get("/process", (req, res) => {
     console.log("Child Proccess closed with code", code);
     if(processData.length > 0) {
       //let dataset = JprocessData);
-      res.status(200).send({data: processData[0]})
+      res.status(200).json({data: processData[0].replace(/\r\n/g, '')})
     } else {
-      res.status(500).send({data: [], message: "No Data"})
+      res.status(500).json({data: [], message: "No Data"})
     }
   })
 });

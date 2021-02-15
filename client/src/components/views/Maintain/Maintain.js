@@ -19,6 +19,7 @@ class Maintain extends React.Component {
     this.toastRef = React.createRef();
     this.importRef = React.createRef();
     this.state = {
+      isProcessing:false,
       suggestedSKU: [],
       loading: true,
       updatedItems: {},
@@ -79,13 +80,28 @@ class Maintain extends React.Component {
   };
 
   processData = () => {
+    this.setState({ isProcessing: true });
     MaintainService.processData()
       .then((res) => {
         if (res) {
           console.log("Data Processed", res.data);
+          this.setState({ isProcessing: false });
+          this.toastRef.current.show({
+            severity: "warn",
+            summary: "Info Message",
+            detail: res.data.data,
+            sticky: true,
+          });
         }
       })
       .catch((err) => {
+        this.toastRef.current.show({
+          severity: "error",
+          summary: "Error Message",
+          detail: "Something Wen Wrong",
+          sticky: true,
+        });
+        this.setState({ isProcessing: false });
         console.log("Error In Processing", err);
       });
   };
@@ -389,7 +405,7 @@ class Maintain extends React.Component {
               myUploader={this.handleUploader}
             />
           </div>
-          <div>
+          <div className="mr-2">
             <Button
               label="Save"
               className="p-button-success"
@@ -398,6 +414,12 @@ class Maintain extends React.Component {
           </div>
           <div>
             <Button
+            disabled={this.state.isProcessing}
+              icon={
+                this.state.isProcessing
+                  ? "pi pi-spin pi-spinner"
+                  : "pi pi-chart-line"
+              }
               label="Process Data"
               className="p-button-warning"
               onClick={this.processData}
