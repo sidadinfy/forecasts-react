@@ -58,7 +58,7 @@ app.get("/process", (req, res) => {
   });
 
   python.on("error", (error) => {
-    console.log("There Was An Error", error);
+    console.log("There Was An Error", JSON.stringify(error));
     res.status(500).json({ error: error });
   });
 });
