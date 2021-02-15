@@ -10,6 +10,14 @@ class MaintainService {
   updateSingleMaintain(id, data) {
     return axios.put(`${DEFAULT_API_PATH}/save/${id}`, data);
   }
+
+  addNewMaintainItem(data) {
+    return axios.post(`${DEFAULT_API_PATH}/add`, data);
+  }
+
+  processData() {
+    return axios.get(`/process`);
+  }
 }
 
 export default new MaintainService();

@@ -30,8 +30,7 @@ router.put("/save/:id", (req, res) => {
     console.log("VALUE", ops);
     updateOPS[ops] = req.body[ops];
   }
-
-  MaintainSchema.updateOne({ _id: id }, { $set: updateOPS })
+  MaintainSchema.updateOne({ _id: id }, { $set: updateOPS }, { upsert: true })
     .exec()
     .then((result) => {
       console.log("FORECAST UPDATED", result);
@@ -41,6 +40,25 @@ router.put("/save/:id", (req, res) => {
     })
     .catch((err) => {
       console.log("ERROR", err);
+      res.status(500).json({
+        error: err,
+      });
+    });
+});
+
+router.get("/view/:uom/:sku", (req, res) => {
+  const UOM = req.params.uom;
+  const sku = req.params.sku;
+  MaintainSchema.find({ uom: UOM, sku_code: sku })
+    .exec()
+    .then((result) => {
+      if (result) {
+        console.log("Found An Item with UOM" + UOM + "and sku as" + sku);
+        res.status(200).json({ result });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
       res.status(500).json({
         error: err,
       });

@@ -7,4 +7,5 @@ db = client.test
 collection = db.maintains
 data = pd.DataFrame(list(collection.find()))
 data["stats_forecast"].mean()
-print(data)
+result = "Mean of Statisitcal Forecast Is : " + str(data["stats_forecast"].mean())
+print(result)
