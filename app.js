@@ -49,13 +49,18 @@ app.get("/process", (req, res) => {
   //Close event to get all the data streamed from child process
   python.on("close", (code) => {
     console.log("Child Proccess closed with code", code);
-    if(processData.length > 0) {
+    if (processData.length > 0) {
       //let dataset = JprocessData);
-      res.status(200).json({data: processData[0].replace(/\r\n/g, '')})
+      res.status(200).json({ data: processData[0].replace(/\r\n/g, "") });
     } else {
-      res.status(500).json({data: [], message: "No Data"})
+      res.status(200).json({ data: [], message: "No Data" });
     }
-  })
+  });
+
+  python.on("error", (error) => {
+    console.log("There Was An Error", error);
+    res.status(500).json({ error: error });
+  });
 });
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/client/build")));
