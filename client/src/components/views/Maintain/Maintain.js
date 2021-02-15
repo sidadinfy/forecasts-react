@@ -19,6 +19,7 @@ class Maintain extends React.Component {
     this.toastRef = React.createRef();
     this.importRef = React.createRef();
     this.state = {
+      isProcessing:false,
       suggestedSKU: [],
       loading: true,
       updatedItems: {},
@@ -76,6 +77,33 @@ class Maintain extends React.Component {
         this.setState({ skuCodes: res.data, originalSKUCodes: res.data });
       }
     });
+  };
+
+  processData = () => {
+    this.setState({ isProcessing: true });
+    MaintainService.processData()
+      .then((res) => {
+        if (res) {
+          console.log("Data Processed", res.data);
+          this.setState({ isProcessing: false });
+          this.toastRef.current.show({
+            severity: "warn",
+            summary: "Info Message",
+            detail: res.data.data,
+            sticky: true,
+          });
+        }
+      })
+      .catch((err) => {
+        this.toastRef.current.show({
+          severity: "error",
+          summary: "Error Message",
+          detail: "Something Wen Wrong",
+          sticky: true,
+        });
+        this.setState({ isProcessing: false });
+        console.log("Error In Processing", err);
+      });
   };
 
   renderRecBody = (rowdata) => {
@@ -242,14 +270,16 @@ class Maintain extends React.Component {
             }
           })
           .catch((err) => {
-            console.log("Error", data);
+            console.log("Error", err);
+            this.toastRef.current.show({
+              severity: "error",
+              summary: "Error Message",
+              detail: "Some Items Did Not Save Properly",
+              sticky: true,
+            });
+            return;
           });
       }
-      this.toastRef.current.show({
-        severity: "success",
-        summary: "Success Message",
-        detail: "Data Saved",
-      });
     } else if (this.state.dataChanged) {
       let data = this.state.data;
       data.map((item, index) => {
@@ -263,54 +293,83 @@ class Maintain extends React.Component {
             }
           })
           .catch((err) => {
-            console.log("Error", err);
+            let { keyValue } = err.response.data.error;
+            let keys = Object.keys(keyValue);
+            let values = Object.values(keyValue);
+            console.log("Error", err.response.data.error.keyValue);
+            this.toastRef.current.show({
+              severity: "error",
+              summary: "Error Message",
+              detail: `${keys[0]} of value ${values[0]} is duplicate item`,
+              sticky: true,
+              closable: true,
+            });
+            return;
           });
-      });
-      this.toastRef.current.show({
-        severity: "success",
-        summary: "Data Successfully Imported",
-        detail: "Data Saved",
       });
     }
   };
+
+  genRanHex = (size) =>
+    [...Array(size)]
+      .map(() => Math.floor(Math.random() * 16).toString(16))
+      .join("");
 
   handleUploader = (event) => {
     var reader = new FileReader();
     let arr = [];
     reader.onload = (e) => {
       var rows = e.target.result.split("\n");
-      for (let i = 1; i < rows.length; i++) {
+      let idExists = false;
+      for (let i = 0; i < rows.length; i++) {
         let obj = {};
-
         let cells = rows[i].split(",");
+
         for (let j = 0; j < cells.length; j++) {
           cells[j] = cells[j].toString().replace(/["']/g, "");
-          if (j === 0) {
-            obj._id = cells[j];
-          }
-          if (j === 1) {
-            obj.product_category = cells[j];
-          }
-          if (j === 2) {
-            obj.sku_code = cells[j];
-          }
-          if (j === 3) {
-            obj.uom = cells[j];
-          }
-          if (j === 4) {
-            obj.period = cells[j];
-          }
-          if (j === 5) {
-            obj.stats_forecast = cells[j];
-          }
-          if (j === 6) {
-            obj.rec_forecast = cells[j];
+          if (i == 0) {
+            if (cells[j] === "ID") {
+              idExists = true;
+              console.log("CELLS", cells[j], j);
+            } else {
+              console.log("ID Doesnt exxists");
+            }
+          } else {
+            if (j === 0) {
+              if (idExists && cells[j] !== "") {
+                obj._id = cells[j];
+              } else {
+                obj._id = this.genRanHex(12);
+              }
+            }
+            if (j === 1) {
+              obj.product_category = cells[j];
+            }
+            if (j === 2) {
+              obj.sku_code = cells[j];
+            }
+            if (j === 3) {
+              obj.uom = cells[j];
+            }
+            if (j === 4) {
+              obj.period = cells[j];
+            }
+            if (j === 5) {
+              obj.stats_forecast = cells[j];
+            }
+            if (j === 6) {
+              obj.rec_forecast = cells[j];
+            }
           }
         }
-        arr.push(obj);
-        this.setState({
-          data: arr,
-        });
+        if (i == 0) {
+          //Do Nothing
+        } else {
+          arr.push(obj);
+          this.setState({
+            data: arr,
+          });
+        }
       }
     };
     reader.onloadend = (e) => {
@@ -346,11 +405,24 @@ class Maintain extends React.Component {
               myUploader={this.handleUploader}
             />
           </div>
-          <div>
+          <div className="mr-2">
             <Button
               label="Save"
               className="p-button-success"
               onClick={this.saveData}
+            />
+          </div>
+          <div>
+            <Button
+            disabled={this.state.isProcessing}
+              icon={
+                this.state.isProcessing
+                  ? "pi pi-spin pi-spinner"
+                  : "pi pi-chart-line"
+              }
+              label="Process Data"
+              className="p-button-warning"
+              onClick={this.processData}
             />
           </div>
         </div>
@@ -522,7 +594,11 @@ class Maintain extends React.Component {
               bodyStyle={{ textAlign: "center", width: "120px" }}
               field="period"
               header="Period"
-              body={(rowdata) => new Date(rowdata.period).toLocaleDateString()}
+              body={(rowdata) =>
+                rowdata.period === ""
+                  ? rowdata.period
+                  : new Date(rowdata.period).toLocaleDateString()
+              }
             ></Column>
             <Column
               headerStyle={{ textAlign: "center", width: "120px" }}
