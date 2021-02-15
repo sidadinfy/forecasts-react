@@ -14,6 +14,10 @@ class MaintainService {
   addNewMaintainItem(data) {
     return axios.post(`${DEFAULT_API_PATH}/add`, data);
   }
+
+  processData() {
+    return axios.get(`/process`);
+  }
 }
 
 export default new MaintainService();

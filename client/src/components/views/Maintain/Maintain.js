@@ -78,6 +78,18 @@ class Maintain extends React.Component {
     });
   };
 
+  processData = () => {
+    MaintainService.processData()
+      .then((res) => {
+        if (res) {
+          console.log("Data Processed", res.data);
+        }
+      })
+      .catch((err) => {
+        console.log("Error In Processing", err);
+      });
+  };
+
   renderRecBody = (rowdata) => {
     return (
       <div>
@@ -382,6 +394,13 @@ class Maintain extends React.Component {
               label="Save"
               className="p-button-success"
               onClick={this.saveData}
+            />
+          </div>
+          <div>
+            <Button
+              label="Process Data"
+              className="p-button-warning"
+              onClick={this.processData}
             />
           </div>
         </div>
