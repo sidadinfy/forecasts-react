@@ -1,5 +1,5 @@
 require("dotenv").config(); // Configure dotenv to load in the .env file
-
+const childProcess = require("child_process");
 const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -36,7 +36,27 @@ app.use((req, res, next) => {
 });
 
 app.use("/maintain", maintainRoutes);
+app.get("/process", (req, res) => {
+  let processData = [];
+  // spawn new child process to call python script
+  const python = childProcess.spawn("python", ["script.py"]);
+  //collect data from script
+  python.stdout.on("data", function (data) {
+    console.log("Pipe Data from python script");
+    processData.push(data.toString());
+  });
 
+  //Close event to get all the data streamed from child process
+  python.on("close", (code) => {
+    console.log("Child Proccess closed with code", code);
+    if(processData.length > 0) {
+      //let dataset = JprocessData);
+      res.status(200).send({data: processData[0]})
+    } else {
+      res.status(500).send({data: [], message: "No Data"})
+    }
+  })
+});
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/client/build")));
 
