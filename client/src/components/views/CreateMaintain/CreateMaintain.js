@@ -1,5 +1,6 @@
 import React from "react";
 import MaintainService from "../../../services/MaintainService";
+import StaticDataService from "../../../services/DataService";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import Datepicker from "../../Datepicker/Datepicker";
@@ -27,6 +28,10 @@ class CreateMaintain extends React.Component {
       statsForecast: 0,
       recForecast: 0,
     });
+  };
+
+  generateSKU = () => {
+    StaticDataService.generateSKU(201, 301);
   };
 
   addNewMaintainItem = () => {
