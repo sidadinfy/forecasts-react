@@ -19,7 +19,7 @@ class Maintain extends React.Component {
     this.toastRef = React.createRef();
     this.importRef = React.createRef();
     this.state = {
-      isProcessing:false,
+      isProcessing: false,
       suggestedSKU: [],
       loading: true,
       updatedItems: {},
@@ -414,7 +414,7 @@ class Maintain extends React.Component {
           </div>
           <div>
             <Button
-            disabled={this.state.isProcessing}
+              disabled={this.state.isProcessing}
               icon={
                 this.state.isProcessing
                   ? "pi pi-spin pi-spinner"
