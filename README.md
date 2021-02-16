@@ -11,6 +11,26 @@
 7. It should compile all the CSS files and start the backend and Frontend
 8. [IMPORTANT]Any Changes should go first into dev branch always.
 
+Create a .env file and add the values as below
+
+[IMPORTANT] DONT COMMIT THE .env file
+
+```
+MONGO_URL=<YOUR MONGO URL>
+PROD_MONGO_URL=<PRODUCTION MONGO URL>
+NODE_ENV=development
+```
+
+# READ BEFORE PUSING TO PRODUCTION
+
+## Rules Regarding Production
+
+There are 3 main files needed when pushing for deployment to heroku.
+
+1. Procfile [PLEASE DONT CHANGE or REMOVE]
+2. script.py [TEST THE SCRIPT IN LOCAL USING PYTHON BEFORE COMMITING]
+3. requirements.txt [DEPENDS ON THE SCRIPT.PY]
+
 ## For Production
 
 1. [IMPORTANT] git checkout to dev branch.
@@ -70,7 +90,7 @@ All Images must be put in a folder named img inside assets
 ## React Components
 
 1. All the custom react components `must` be inside the `components` folder.
-2. Dont Use component as part of the name of the folder or the file.
+2. Dont Use component as part of the name of the folder or the file. Like "DateComponent".
 3. Always create a folder and inside that add the file.
 4. When using Prime React components always send the {...this.props} back in the props.
 5. Always use class based components, unless really necesary use functional with hooks.
@@ -100,7 +120,44 @@ All Images must be put in a folder named img inside assets
        path: linkAbout,
        exact: true,
        name: linkNameAbout,
-       component: Maintain,
+       component: About,
      },
    ];
    ```
+
+6. Use this specific instructions otherwise the pages will not link properly.
+7. Inside the components folder, make sure to export the correct component name.
+8. If you need to add authenticated routes, please add them in App.js directly.
+9. In order to check for authenticated paths, please refer `containers/DefaultLayout.js`
+10. Each route exported in `routes` array inside the `routes.js` file will be authenticated route.
+
+## Rule Of Adding CSS styles in Tailwind.js
+
+Adding styles will be different in this project as we are using tailwind.js which compiles all the styles written into a main.css file automatically.
+
+1. Open tailwind.js
+2. If you want to add a color with a #EF5B25 and name it postman-orange.
+3. It will be set inside the `colors` object like below.
+
+```javascript
+colors: {
+    transparent: "transparent",
+    current: "currentColor",
+    button: "#ff416c",
+    button2: "#ff4b2b",
+    "postman-orange": "EF5B25"
+}
+```
+
+4. Once you have set the color, you need to stop the current server if its running and restart again.
+
+5. Once restarted the `main.css` will be changed. If there is no change in that file then stop the server. Delete the `main.css` from local and then restart server again.
+
+6. After that main.css should have been updated with all new values. Now we can use this style in our React Component.
+
+7. For Usage please refer the files and you will get an idea. All the background styles will start with "bg-postman-orange". If you want only color property we use "text-postman-orange". For any more refrences of the available properties go thorough the tailwind css website given above.
+   <br/><br/>
+
+## DEBUG
+
+For production you need to install heroku cli into local machine in order to see complete log. Please follow steps in heroku website to install local CLI.
