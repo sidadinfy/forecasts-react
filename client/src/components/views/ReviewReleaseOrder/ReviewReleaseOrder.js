@@ -3,6 +3,7 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { InputText } from "primereact/inputtext";
 import React from "react";
+import { Toast } from "primereact/toast";
 import { Helmet } from "react-helmet";
 import { linkNameReviewReleaseOrder } from "../../../routes";
 import StaticDataService from "../../../services/DataService";
@@ -17,8 +18,10 @@ class ReviewReleaseOrder extends React.Component {
     super(props);
     this.df = React.createRef();
     this.importRef = React.createRef();
-
+    this.toastRef = React.createRef();
     this.state = {
+      dataChanged: false,
+      updatedItems: {},
       filter: {
         fromDateValue: null,
         toDateValue: null,
@@ -201,22 +204,31 @@ class ReviewReleaseOrder extends React.Component {
     return (
       <div>
         <InputText
-          value={rowdata.revised_order_qty}
-          id={rowdata.id}
+          value={
+            rowdata.revised_order_qty !== "" ||
+            rowdata.revised_order_qty !== null
+              ? rowdata.revised_order_qty
+              : ""
+          }
+          id={rowdata._id}
           type="text"
           placeholder="Revised Quantity"
           onChange={(e) => {
-            debugger;
             let maintainData = this.state.data;
             if (maintainData.length > 0) {
-              debugger;
               let currentProd = maintainData.filter(
-                (item) => item.id === rowdata.id
+                (item) => item._id === rowdata._id
               );
-              debugger;
+
               currentProd[0].revised_order_qty = e.target.value;
 
-              this.setState({ data: maintainData });
+              this.setState({
+                data: maintainData,
+                updatedItems: {
+                  ...this.state.updatedItems,
+                  [rowdata._id]: rowdata,
+                },
+              });
             }
           }}
         />
@@ -237,15 +249,14 @@ class ReviewReleaseOrder extends React.Component {
       var rows = e.target.result.split("\n");
       for (let i = 1; i < rows.length; i++) {
         let obj = {};
-        let cells = rows[i].split(",");
+        let cells = rows[i].split("#");
         for (let j = 0; j < cells.length; j++) {
           cells[j] = cells[j].toString().replace(/["']/g, "");
-          debugger;
           if (j === 0) {
             obj.product_category = cells[j];
           }
           if (j === 1) {
-            obj.sku = cells[j];
+            obj.sku_code = cells[j];
           }
           if (j === 2) {
             obj.uom = cells[j];
@@ -272,17 +283,21 @@ class ReviewReleaseOrder extends React.Component {
             obj.revised_order_qty = cells[j];
           }
         }
-        obj["id"] = Math.abs(i - 1);
+        //obj["id"] = Math.abs(i - 1);
         arr.push(obj);
         this.setState({
           data: arr,
         });
-        debugger;
       }
     };
     reader.onloadend = (e) => {
       console.log("Loaded", e.loaded);
-      this.setState({ filter: {}, selectedCategory: "", sku: "" });
+      this.setState({
+        filter: {},
+        selectedCategory: "",
+        sku: "",
+        dataChanged: true,
+      });
       this.importRef.current.clear();
     };
     reader.readAsText(event.files[0]);
@@ -302,6 +317,68 @@ class ReviewReleaseOrder extends React.Component {
       }
       this.setState({ suggestedSKU: filteredCountries });
     }, 250);
+  };
+
+  saveData = () => {
+    if (Object.keys(this.state.updatedItems).length > 0) {
+      let data = this.state.updatedItems;
+      for (const key in data) {
+        ReleaseService.updateSingleReleaseOrder(
+          data[key]["sku_code"],
+          data[key]["uom"],
+          data[key]
+        )
+          .then((res) => {
+            if (res) {
+              console.log("Success", data[key]["_id"]);
+              this.setState({ loading: true }, () => {
+                this.getAllOrders();
+              });
+            }
+          })
+          .catch((err) => {
+            console.log("Error", err);
+            this.toastRef.current.show({
+              severity: "error",
+              summary: "Error Message",
+              detail: "Some Items Did Not Save Properly",
+              sticky: true,
+            });
+            return;
+          });
+      }
+    } else if (this.state.dataChanged) {
+      let data = this.state.data;
+      data.map((item, index) => {
+        ReleaseService.updateSingleReleaseOrder(
+          item["sku_code"],
+          item["uom"],
+          item
+        )
+          .then((res) => {
+            if (res) {
+              console.log("Success - Export", item);
+              this.setState({ loading: true }, () => {
+                this.getAllOrders();
+              });
+            }
+          })
+          .catch((err) => {
+            let { keyValue } = err.response.data.error;
+            let keys = Object.keys(keyValue);
+            let values = Object.values(keyValue);
+            console.log("Error", err.response.data.error.keyValue);
+            this.toastRef.current.show({
+              severity: "error",
+              summary: "Error Message",
+              detail: `${keys[0]} of value ${values[0]} is duplicate item`,
+              sticky: true,
+              closable: true,
+            });
+            return;
+          });
+      });
+    }
   };
 
   renderFooter() {
@@ -343,6 +420,7 @@ class ReviewReleaseOrder extends React.Component {
           <meta charSet="utf-8" />
           <title>{linkNameReviewReleaseOrder}</title>
         </Helmet>
+        <Toast ref={this.toastRef} />
         <div className="mx-auto max-w-3xl">
           <div className="text-3xl font-bold text-center">
             Review And Release Order
@@ -464,6 +542,7 @@ class ReviewReleaseOrder extends React.Component {
             emptyMessage="No Data Found"
             footer={this.renderFooter()}
             loading={this.state.loading}
+            csvSeparator="#"
           >
             <Column
               headerStyle={{ textAlign: "center", width: "180px" }}

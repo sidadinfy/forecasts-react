@@ -9,36 +9,6 @@ class SearchDropdown extends React.Component {
     filteredSKU: [],
   };
 
-  componentDidMount() {
-    this.getAllSKUCodes();
-  }
-
-  getAllSKUCodes = () => {
-    StaticDataService.getAllSKUCodes()
-      .then((res) => {
-        if (res) {
-          this.setState({ allSKUCodes: res.data, orginalData: res.data });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  searchCountry = (event) => {
-    let { allSKUCodes } = this.state;
-    setTimeout(() => {
-      let filteredCountries;
-      if (!event.query.trim().length) {
-        filteredCountries = [...allSKUCodes];
-      } else {
-        filteredCountries = allSKUCodes.filter((code) => {
-          return code.value.toLowerCase().startsWith(event.query.toLowerCase());
-        });
-      }
-      this.setState({ filteredSKU: filteredCountries });
-    }, 250);
-  };
   render() {
     return (
       <AutoComplete

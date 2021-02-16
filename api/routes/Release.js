@@ -33,7 +33,11 @@ router.put("/save/:uom/:sku", (req, res) => {
   }
   for (const ops in req.body) {
     console.log("VALUE", ops);
-    if (ops === "uom" || ops === "sku_code") {
+    if (
+      (ops === "uom" || ops === "sku_code") &&
+      (req.body["uom"] !== req.params.uom ||
+        req.body["sku_code"] !== req.params.sku)
+    ) {
       return res.status(404).json({ message: "You Cannot Update SKU or UOM" });
     } else {
       updateOPS[ops] = req.body[ops];
