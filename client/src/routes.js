@@ -13,6 +13,7 @@ export const linkNameReviewReleaseOrder = "Review And Release Order";
 export const linkNameCreateMaintain = "Create Forecast Item";
 //Link Names
 
+//Pages
 const Maintain = React.lazy(() =>
   import("./components/views/Maintain/Maintain")
 );
@@ -26,6 +27,8 @@ const ReviewReleaseOrder = React.lazy(() =>
 const CreateMaintain = React.lazy(() =>
   import("./components/views/CreateMaintain/CreateMaintain")
 );
+//Pages
+
 const routes = [
   {
     path: linkMaintain,
