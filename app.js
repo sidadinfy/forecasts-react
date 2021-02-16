@@ -4,6 +4,8 @@ const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
 const maintainRoutes = require("./api/routes/Maintain");
+const releaseRoutes = require("./api/routes/Release");
+const skuRoutes = require("./api/routes/SKU");
 const morgan = require("morgan");
 const path = require("path");
 const app = express();
@@ -36,6 +38,8 @@ app.use((req, res, next) => {
 });
 
 app.use("/maintain", maintainRoutes);
+app.use("/release", releaseRoutes);
+app.use("/sku", skuRoutes);
 app.get("/process", (req, res) => {
   let processData = [];
   // spawn new child process to call python script
@@ -49,13 +53,18 @@ app.get("/process", (req, res) => {
   //Close event to get all the data streamed from child process
   python.on("close", (code) => {
     console.log("Child Proccess closed with code", code);
-    if(processData.length > 0) {
+    if (processData.length > 0) {
       //let dataset = JprocessData);
-      res.status(200).json({data: processData[0].replace(/\r\n/g, '')})
+      res.status(200).json({ data: processData[0].replace(/\r\n/g, "") });
     } else {
-      res.status(500).json({data: [], message: "No Data"})
+      res.status(200).json({ data: [], message: "No Data" });
     }
-  })
+  });
+
+  python.on("error", (error) => {
+    console.log("There Was An Error", JSON.stringify(error));
+    res.status(500).json({ error: error });
+  });
 });
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/client/build")));

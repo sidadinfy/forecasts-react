@@ -6,6 +6,7 @@ import React from "react";
 import { Helmet } from "react-helmet";
 import { linkNameReviewReleaseOrder } from "../../../routes";
 import StaticDataService from "../../../services/DataService";
+import ReleaseService from "../../../services/ReleaseService";
 import Datepicker from "../../Datepicker/Datepicker";
 import Importer from "../../Importer/Importer";
 import SearchDropdown from "../../SearchDropdown/SearchDropdown";
@@ -23,6 +24,7 @@ class ReviewReleaseOrder extends React.Component {
         toDateValue: null,
         selectedCategory: "",
       },
+      loading: true,
       importMap: {},
       data: [],
       originalData: [],
@@ -40,10 +42,14 @@ class ReviewReleaseOrder extends React.Component {
   }
 
   getAllOrders = () => {
-    StaticDataService.getAllRevisedReleasedOrders()
+    ReleaseService.getAllReleaseOrders()
       .then((res) => {
         if (res) {
-          this.setState({ data: res.data, originalData: res.data });
+          this.setState({
+            data: res.data,
+            originalData: res.data,
+            loading: false,
+          });
         }
       })
       .catch((err) => {
@@ -291,7 +297,7 @@ class ReviewReleaseOrder extends React.Component {
         filteredCountries = [...skuCodes];
       } else {
         filteredCountries = skuCodes.filter((code) => {
-          return code.toLowerCase().startsWith(event.query.toLowerCase());
+          return code.value.toLowerCase().startsWith(event.query.toLowerCase());
         });
       }
       this.setState({ suggestedSKU: filteredCountries });
@@ -457,6 +463,7 @@ class ReviewReleaseOrder extends React.Component {
             scrollable={true}
             emptyMessage="No Data Found"
             footer={this.renderFooter()}
+            loading={this.state.loading}
           >
             <Column
               headerStyle={{ textAlign: "center", width: "180px" }}
@@ -467,7 +474,7 @@ class ReviewReleaseOrder extends React.Component {
             <Column
               headerStyle={{ textAlign: "center", width: "110px" }}
               bodyStyle={{ textAlign: "center", width: "110px" }}
-              field="sku"
+              field="sku_code"
               header="SKU"
             ></Column>
             <Column

@@ -1,3 +1,5 @@
+import axios from "axios";
+
 class StaticDataService {
   getProductCategories() {
     return new Promise(function (resolve, reject) {
@@ -9,6 +11,24 @@ class StaticDataService {
         ],
       });
     });
+  }
+
+  generateSKU(from, to) {
+    if (from >= 100 && to >= 100) {
+      for (let i = from; i <= to; i++) {
+        axios
+          .post(`sku/add`, { name: `ABC${i}`, value: `ABC${i}` })
+          .then((res) => {
+            if (res) {
+              console.log("Generated Data");
+            }
+          })
+          .catch((err) => {
+            console.log("Some Error", err);
+          });
+      }
+    } else {
+    }
   }
 
   getSKUBasedOnCategory(category) {
@@ -1020,34 +1040,7 @@ class StaticDataService {
   }
 
   getAllSKUCodes() {
-    return new Promise(function (resolve, reject) {
-      resolve({
-        status: 200,
-        data: [
-          "ABC111",
-          "ABC112",
-          "ABC113",
-          "ABC114",
-          "ABC115",
-          "ABC116",
-          "ABC117",
-          "ABC118",
-          "ABC119",
-          "ABC120",
-          "ABC121",
-          "ABC122",
-          "ABC123",
-          "ABC124",
-          "ABC125",
-          "ABC126",
-          "ABC127",
-          "ABC128",
-          "ABC129",
-          "ABC130",
-          "Tide",
-        ],
-      });
-    });
+    return axios.get(`sku/view`);
   }
 }
 
