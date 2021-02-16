@@ -2,8 +2,17 @@ const mongoose = require("mongoose");
 const releaseSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
   product_category: { type: String, required: true },
-  sku_code: { type: String, required: true, index: { unique: true } },
-  uom: { type: String, required: true },
+  sku_code: {
+    type: String,
+    required: true,
+    index: { unique: true },
+    minlength: [6, "Minimun code length 6 characters"],
+  },
+  uom: {
+    type: String,
+    required: true,
+    minlength: [2, "Minimun code length 2 characters"],
+  },
   lead_time: { type: String, required: true },
   sourcing_location: { type: String, required: true },
   days_of_stock: { type: Number, required: true, default: 0 },

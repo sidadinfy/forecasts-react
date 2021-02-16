@@ -4,6 +4,7 @@ const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
 const maintainRoutes = require("./api/routes/Maintain");
+const releaseRoutes = require("./api/routes/Release");
 const morgan = require("morgan");
 const path = require("path");
 const app = express();
@@ -36,6 +37,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/maintain", maintainRoutes);
+app.use("/release", releaseRoutes);
 app.get("/process", (req, res) => {
   let processData = [];
   // spawn new child process to call python script
