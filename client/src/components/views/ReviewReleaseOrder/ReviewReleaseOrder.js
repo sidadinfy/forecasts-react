@@ -20,6 +20,7 @@ class ReviewReleaseOrder extends React.Component {
     this.importRef = React.createRef();
     this.toastRef = React.createRef();
     this.state = {
+      filterError: "",
       dataChanged: false,
       updatedItems: {},
       filter: {
@@ -98,6 +99,13 @@ class ReviewReleaseOrder extends React.Component {
     let filtered = [...this.state.originalData];
     let fromDateValue = this.state.filter && this.state.filter.fromDateValue;
     let toDateValue = this.state.filter && this.state.filter.toDateValue;
+    let skuVal = this.state.sku && this.state.sku.name;
+    if (skuVal) {
+    } else {
+      this.setState({ filterError: "SKU Selected Value is Incorrect" });
+      return;
+    }
+
     if (fromDateValue && toDateValue) {
       //Only From Date and To Date
       filtered = allProducts.filter((item) => {
@@ -120,19 +128,24 @@ class ReviewReleaseOrder extends React.Component {
           this.state.filter.selectedCategory
       );
     }
-    if (this.state.sku) {
+    if (this.state.sku && this.state.sku.name) {
       //Only SKU
       filtered = allProducts.filter(
-        (item) => item.sku.toLowerCase() === this.state.sku.toLowerCase()
+        (item) =>
+          item.sku_code.toLowerCase() === this.state.sku.value.toLowerCase()
       );
     }
-    if (this.state.filter.selectedCategory && this.state.sku) {
+    if (
+      this.state.filter.selectedCategory &&
+      this.state.sku &&
+      this.state.sku.name
+    ) {
       //Both Category and SKU
       filtered = allProducts.filter((item) => {
         if (
           item.product_category.toLowerCase() ===
             this.state.filter.selectedCategory &&
-          item.sku.toLowerCase() === this.state.sku.toLowerCase()
+          item.sku_code.toLowerCase() === this.state.sku.value.toLowerCase()
         ) {
           return item;
         } else {
@@ -141,13 +154,13 @@ class ReviewReleaseOrder extends React.Component {
       });
     }
 
-    if (fromDateValue && toDateValue && this.state.sku) {
+    if (fromDateValue && toDateValue && this.state.sku && this.state.sku.name) {
       //All From Date and To Date and SKU
       filtered = allProducts.filter((item) => {
         if (
           new Date(item.period) >= fromDateValue &&
           new Date(item.period) <= toDateValue &&
-          item.sku.toLowerCase() === this.state.sku.toLowerCase()
+          item.sku_code.toLowerCase() === this.state.sku.value.toLowerCase()
         ) {
           return item;
         }
@@ -180,7 +193,8 @@ class ReviewReleaseOrder extends React.Component {
       toDateValue &&
       this.state.filter &&
       this.state.filter.selectedCategory &&
-      this.state.sku
+      this.state.sku &&
+      this.state.sku.name
     ) {
       //All From Date and To date and Category and SKu
       filtered = allProducts.filter((item) => {
@@ -189,7 +203,7 @@ class ReviewReleaseOrder extends React.Component {
           new Date(item.period) <= toDateValue &&
           item.product_category.toLowerCase() ===
             this.state.filter.selectedCategory &&
-          item.sku.toLowerCase() === this.state.sku.toLowerCase()
+          item.sku_code.toLowerCase() === this.state.sku.value.toLowerCase()
         ) {
           return item;
         }
@@ -197,7 +211,7 @@ class ReviewReleaseOrder extends React.Component {
       });
     }
 
-    this.setState({ data: filtered });
+    this.setState({ data: filtered, filterError: "" });
   };
 
   renderRevisedQty = (rowdata) => {
@@ -474,17 +488,12 @@ class ReviewReleaseOrder extends React.Component {
                       this.state.filter && this.state.filter.selectedCategory
                     }
                     handleChange={(val) => {
-                      this.setState(
-                        {
-                          filter: {
-                            ...this.state.filter,
-                            selectedCategory: val,
-                          },
+                      this.setState({
+                        filter: {
+                          ...this.state.filter,
+                          selectedCategory: val,
                         },
-                        () => {
-                          this.getSKUBasedOnCategory(val);
-                        }
-                      );
+                      });
                     }}
                   />
                 </div>
@@ -533,7 +542,14 @@ class ReviewReleaseOrder extends React.Component {
             </div>
           </div>
         </div>
-        <div className="max-w-8xl mx-auto my-5 datatable-responsive-demo">
+        {this.state.filterError ? (
+          <div className="w-full text-center text-red-600 pt-2">
+            {this.state.filterError}
+          </div>
+        ) : (
+          ""
+        )}
+        <div className="max-w-8xl mx-auto my-4 datatable-responsive-demo">
           <DataTable
             ref={this.df}
             value={this.state.data}
