@@ -7,7 +7,7 @@ class StaticDataService {
         status: 200,
         data: [
           { label: "Dental", value: "dental" },
-          { label: "Detergents", value: "detergents" },
+          { label: "Detergent", value: "detergent" },
         ],
       });
     });
