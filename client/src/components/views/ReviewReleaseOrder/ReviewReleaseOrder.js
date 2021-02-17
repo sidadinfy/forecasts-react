@@ -263,7 +263,7 @@ class ReviewReleaseOrder extends React.Component {
       var rows = e.target.result.split("\n");
       for (let i = 1; i < rows.length; i++) {
         let obj = {};
-        let cells = rows[i].split("#");
+        let cells = rows[i].split(",");
         for (let j = 0; j < cells.length; j++) {
           cells[j] = cells[j].toString().replace(/["']/g, "");
           if (j === 0) {
@@ -558,7 +558,7 @@ class ReviewReleaseOrder extends React.Component {
             emptyMessage="No Data Found"
             footer={this.renderFooter()}
             loading={this.state.loading}
-            csvSeparator="#"
+            csvSeparator=","
           >
             <Column
               headerStyle={{ textAlign: "center", width: "180px" }}
