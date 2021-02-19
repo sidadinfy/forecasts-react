@@ -259,11 +259,22 @@ class ReviewReleaseOrder extends React.Component {
   handleUploader = (event) => {
     var reader = new FileReader();
     let arr = [];
+    var error = false;
     reader.onload = (e) => {
       var rows = e.target.result.split("\n");
+      var header = rows[0].split(",");
+      console.log("Header Length", header.length, header);
       for (let i = 1; i < rows.length; i++) {
         let obj = {};
         let cells = rows[i].split(",");
+        console.log("cells Length", cells.length, cells);
+        if (header.length === cells.length) {
+          console.log("CSV PARSED");
+          error = false;
+        } else {
+          error = true;
+          return 0;
+        }
         for (let j = 0; j < cells.length; j++) {
           cells[j] = cells[j].toString().replace(/["']/g, "");
           if (j === 0) {
@@ -305,17 +316,26 @@ class ReviewReleaseOrder extends React.Component {
       }
     };
     reader.onloadend = (e) => {
-      console.log("Loaded", e.loaded);
-      this.setState({
-        filter: {},
-        selectedCategory: "",
-        sku: "",
-        dataChanged: true,
-      });
-      this.importRef.current.clear();
+      if (error) {
+        this.toastRef.current.show({
+          severity: "error",
+          summary: "Error Message - Incorrect CSV Format ',' ",
+          detail: "Use of Comma is invalid in Data in Sourcing Location",
+          sticky: true,
+        });
+      } else {
+        console.log("Loaded", e.loaded);
+        this.setState({
+          filter: {},
+          selectedCategory: "",
+          sku: "",
+          dataChanged: true,
+        });
+        this.importRef.current.clear();
+      }
+      //event.files == files to upload
     };
     reader.readAsText(event.files[0]);
-    //event.files == files to upload
   };
 
   searchSKU = (event) => {
