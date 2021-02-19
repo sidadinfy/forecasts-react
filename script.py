@@ -1,8 +1,17 @@
 #import dns
+from dotenv import dotenv_values
 import pymongo
 import pandas as pd
 from pymongo import MongoClient
-client = pymongo.MongoClient("mongodb://sid:W9kBMgib7rnZSTm@forecasts-shard-00-00.fnus4.mongodb.net:27017,forecasts-shard-00-01.fnus4.mongodb.net:27017,forecasts-shard-00-02.fnus4.mongodb.net:27017/test?ssl=true&replicaSet=atlas-ltbkho-shard-0&authSource=admin&retryWrites=true&w=majority")
+config = dotenv_values(".env")
+MONGO_URL = config['MONGO_URL']
+MONGO_URL_PROD = config['MONGO_URL_PROD']
+NODE_ENV = config['NODE_ENV']
+URL = MONGO_URL
+if NODE_ENV == "production":
+    URL = MONGO_URL_PROD
+
+client = pymongo.MongoClient(URL)
 db = client.test
 collection = db.maintains
 data = pd.DataFrame(list(collection.find()))

@@ -40,7 +40,11 @@ router.put("/save/:uom/:sku", (req, res) => {
     ) {
       return res.status(404).json({ message: "You Cannot Update SKU or UOM" });
     } else {
-      updateOPS[ops] = req.body[ops];
+      if (ops === "sourcing_location") {
+        updateOPS[ops] = req.body[ops].replace(",", "-");
+      } else {
+        updateOPS[ops] = req.body[ops];
+      }
     }
   }
   ReleaseSchema.updateOne(
@@ -95,7 +99,7 @@ router.post("/add", (req, res) => {
     sku_code: req.body.sku_code,
     uom: req.body.uom,
     lead_time: req.body.lead_time,
-    sourcing_location: req.body.sourcing_location,
+    sourcing_location: req.body.sourcing_location.replace(",", "-"),
     days_of_stock: req.body.days_of_stock,
     intransit_inventory_days: req.body.intransit_inventory_days,
     forecast_demand: req.body.forecast_demand,

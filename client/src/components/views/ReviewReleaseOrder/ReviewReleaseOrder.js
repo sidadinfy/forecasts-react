@@ -259,12 +259,18 @@ class ReviewReleaseOrder extends React.Component {
   handleUploader = (event) => {
     var reader = new FileReader();
     let arr = [];
+    let error = false;
     reader.onload = (e) => {
       var rows = e.target.result.split("\n");
       for (let i = 1; i < rows.length; i++) {
         let obj = {};
         let cells = rows[i].split(",");
         for (let j = 0; j < cells.length; j++) {
+          if (cells.length === rows.length) {
+          } else {
+            error = true;
+            return;
+          }
           cells[j] = cells[j].toString().replace(/["']/g, "");
           if (j === 0) {
             obj.product_category = cells[j];
@@ -305,16 +311,26 @@ class ReviewReleaseOrder extends React.Component {
       }
     };
     reader.onloadend = (e) => {
-      console.log("Loaded", e.loaded);
-      this.setState({
-        filter: {},
-        selectedCategory: "",
-        sku: "",
-        dataChanged: true,
-      });
-      this.importRef.current.clear();
+      if (error) {
+        this.toastRef.current.show({
+          severity: "error",
+          summary: "Error Message",
+          detail:
+            "There Was An Error Converting CSV, Please avoid using comma inside the CSV",
+          sticky: true,
+        });
+      } else {
+        console.log("Loaded", e.loaded);
+        this.setState({
+          filter: {},
+          selectedCategory: "",
+          sku: "",
+          dataChanged: true,
+        });
+        this.importRef.current.clear();
+      }
+      reader.readAsText(event.files[0]);
     };
-    reader.readAsText(event.files[0]);
     //event.files == files to upload
   };
 
